@@ -1,0 +1,12 @@
+baseURL = "https://www.pipehow.tech/"
+languageCode = "en-us"
+title = "| How"
+theme = "hyde"
+disqusShortname = "emanuelpalm"
+
+[params]
+introduction = "PowerShell, C#, .NET and virtual dragon slaying on the internet."
+description = "Website and blog of Swedish IT viking Emanuel Palm about his quest for knowledge - and the silly adventures along the way."
+githubURL = "https://github.com/MrEpiX"
+linkedinURL = "https://www.linkedin.com/in/emanuel-palm-099878b2/"
+author = "Emanuel Palm"
