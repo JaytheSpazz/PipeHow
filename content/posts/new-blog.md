@@ -1,0 +1,12 @@
+---
+title: "Serverless blogging using Hugo in Azure"
+date: 2019-04-26T12:19:53+02:00
+summary: "I remade my blog using GitHub, Azure and Hugo!"
+draft: true
+---
+
+I've always wanted to have a website that I can manage on my own, without too many fancy settings to confuse me but with enough flexibility to adapt it to my needs. I've given it a few attempts at keeping an active blog on Wordpress, but I always end up finding it too inconvenient for my needs. Call me picky, but I like being to change things without too many settings and extensions while still being able to simply write a blogpost and publish it. Not to say that Wordpress isn't quick and easy, and I'm not doubting that my lack of knowledge about it comes into play, but I've found it tricky to edit or implement even small details such as showing code in a proper format.
+
+So have a seat, grab a drink and let me tell you my adventures in creating a new blog using [Hugo](https://gohugo.io/), buying a custom domain, redirecting it using [Cloudflare](https://www.cloudflare.com/) to my [Azure CDN endpoint](https://azure.microsoft.com/en-us/services/cdn/) connected to my [Azure Storage](https://azure.microsoft.com/en-us/services/storage/) where I store my blog as a [Static Website](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website), setting up a [GitHub](https://github.com/) repository, [Azure DevOps](https://azure.microsoft.com/en-us/services/devops/) and connecting the two with build and release pipelines to automatically update my blog as soon as I push new changes to my repository. If that sentence didn't scare you off it's time to buckle up, because I had no idea about how do to any of those things before and in this post I'll be explaining the steps I took to fail, and what eventually worked out.
+
+It started with [Simon Wåhlin](http://blog.simonw.se/hosting-a-blog-without-server/) mentioning to me that he had migrated his blog (with considerably more content than mine) from Wordpress to using Hugo to create it from Markdown files and hosting it in Azure as a Static Website. That gave me inspiration to try the same, but first I had to figure out where to begin. I [signed up a for trial account in Azure](https://azure.microsoft.com/en-us/free/), downloaded Hugo, chose a theme and started a new website with one post according to the tutorial.
