@@ -1,0 +1,21 @@
+pre {
+    background-color: #282722;
+    border-radius: 6px;
+    overflow: auto;
+}
+
+.no-underline:active,
+.no-underline:hover,
+.no-underline:visited,
+.no-underline:link {
+    text-decoration: none;
+}
+
+.desc {
+    font-size: 1.05rem;
+    font-weight: 300;
+}
+
+.copyright-text {
+    font-size: 0.7rem;
+}
