@@ -3,9 +3,12 @@ languageCode = "en-us"
 title = "| How"
 theme = "hyde"
 disqusShortname = "emanuelpalm"
+pygmentsCodeFences = true
+pygmentsUseClasses = true
+pygmentsCodefencesGuessSyntax = true
 
 [params]
-introduction = "PowerShell, C#, .NET and virtual dragon slaying on the internet."
+introduction = "PowerShell, C#, .NET - and other tidbits of fun."
 description = "Website and blog of Swedish IT viking Emanuel Palm about his quest for knowledge - and the silly adventures along the way."
 githubURL = "https://github.com/MrEpiX"
 linkedinURL = "https://www.linkedin.com/in/emanuel-palm-099878b2/"

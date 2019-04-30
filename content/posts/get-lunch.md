@@ -11,12 +11,12 @@ In the start of the past summer, a coworker and I were discussing our lunch plan
 
 I started listing restaurants in an array...
 
-{{<highlight ps1>}}
+```ps1
 $Restaurants = @(
 "Decent Burger Place",
 "Close-by Buffé",
 "Pasta Take-Away")
-{{< /highlight >}}
+```
 While typing out what I could think of I asked my coworker, over my shoulder, what more places to add. He responded with a thought that it would be cool to instead of listing them manually, finding them through what’s closest on Google.
 
 That’s possible, I thought; I *can* make that.
@@ -26,17 +26,17 @@ On [Google’s Cloud Platform](https://console.cloud.google.com/apis/) you can s
 
 Using the API is generally done in JSON, which PowerShell manages very well through ConvertFrom-Json and ConvertTo-Json. A quick example of how to get latitude and longitude through the API using Invoke-WebRequest:
 
-{{<highlight ps1>}}
+```ps1
 $GeoResult = Invoke-WebRequest -Method Get -ContentType "application/json" -Uri "$URL/geocode/json?address=$Address&key=$APIKey" | ConvertFrom-Json
 $GeoResult.results.geometry.location.lat
 $GeoResult.results.geometry.location.lng
-{{< /highlight >}}
+```
 
 There are a few ways of finding nearby restaurants, either get restaurants within a certain radius, or the closest ones from a location. I found that using the parameter `` ```rankby=distance` and `type=restaurant` would give me the 20 closest, which was a good start for my idea.
 
-{{<highlight ps1>}}
+```ps1
 $NearbyResult = Invoke-WebRequest -Method Get -ContentType "application/json" -Uri "$URL/place/nearbysearch/json?oe=utf-8&language=sv&location=$($Latitude),$($Longitude)&type=restaurant&rankby=distance&key=$APIKey" | ConvertFrom-Json
-{{< /highlight >}}
+```
 
 I found that the result of the request also includes something called a page token to use for repeated requests for more restaurants. You can therefore do another request for 20 more restaurants twice, for a total of 60.
 
@@ -44,7 +44,7 @@ I implemented a while loop that sends requests until the token is null, with a s
 
 *There is a short delay between when a next_page_token is issued, and when it will become valid. Requesting the next page before it is available will return an INVALID_REQUEST response.*
 
-{{<highlight ps1>}}
+```ps1
 $Token = $NearbyResult.next_page_token
 
 # loop through the next_page_tokens to get 40 more restaurants, you can only get 3 "pages"
@@ -57,13 +57,13 @@ while ($Token)
     $Results += $NearbyResult.results
     $Token = $NearbyResult.next_page_token
 }
-{{< /highlight >}}
+```
 
 “That’s it!”, I thought after populating a list of restaurants, adding filtering on restaurants currently open, sorting it randomly and selecting a restaurant.
 
-{{<highlight ps1>}}
+```ps1
 $Restaurant = $Results | Where-Object { $_.opening_hours.open_now -eq $true } | Select-Object -ExpandProperty name -Unique | Sort-Object { Get-Random } | Select-Object -First 1
-{{< /highlight >}}
+```
 
 I got my result, but I wasn’t quite happy. It needed polish, and I needed it to be available to my coworkers so that I wasn’t the only one to have to eat something I hadn’t chosen.
 
@@ -78,12 +78,12 @@ After shamelessly stealing pictures and HTML layout online, I managed to scratch
 
 Here is some code I add to the body through a loop that goes through each restaurant provided to Send-LunchEmail.ps1:
 
-{{<highlight ps1>}}
+```ps1
 $InfoHTML = @"
 <td align="center" valign="middle" width="50%"><a href="$($Item.Website)"><span style="color: #$($TextColor)">$($Item.Name) ★$($Item.Rating)★</span></a></td>
 <td align="center" valign="middle" width="50%"><span style="color: #$($TextColor); text-decoration-line: underline;">$($Item.Time) ($($Item.Distance))</span></td>
 "@
-{{< /highlight >}}
+```
 
 PowerShell’s Send-MailMessage didn’t seem to like embedding images in the HTML body, so I found [this adaption of Send-MailMessage](https://gallery.technet.microsoft.com/scriptcenter/Send-MailMessage-3a920a6d) which solved that problem.
 

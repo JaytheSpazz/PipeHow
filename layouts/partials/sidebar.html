@@ -12,8 +12,9 @@
 
     <nav>
       <ul class="sidebar-nav">
-        <li><a href="{{ with .Site.Params.githubURL }} {{.}} {{ end }}" target="_blank">GitHub</a> </li>
-        <li><a href="{{ with .Site.Params.linkedinURL }} {{.}} {{ end }}" target="_blank">LinkedIn</a> </li>
+        <li><a href="{{ .Site.BaseURL }}">Home</a> </li>
+        <li><a href="{{ .Site.Params.githubURL }}" target="_blank">GitHub</a> </li>
+        <li><a href="{{ .Site.Params.linkedinURL }}" target="_blank">LinkedIn</a> </li>
         {{ range .Site.Menus.main -}}
           <li><a href="{{.URL}}"> {{ .Name }} </a></li>
         {{- end }}
