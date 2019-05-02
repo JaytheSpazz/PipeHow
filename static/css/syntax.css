@@ -1,10 +1,10 @@
 /* Most colors taken from Visual Studio Code dark theme */
 code .hll { background-color: #1e1e1e }
 code .c { color: #608b4e; } /* Comment */
-code .err { color: #AA0000; background-color: #FFAAAA } /* Error */
+code .err { color: #d4d4d4; } /* Error */
 code .k { color: #569cd6; } /* Keyword */
 code .o { color: #555555 } /* Operator */
-code .cm { color: #608b4e; font-style: italic } /* Comment.Multiline */
+code .cm { color: #608b4e } /* Comment.Multiline */
 code .cp { color: #009999 } /* Comment.Preproc */
 code .c1 { color: #999; } /* Comment.Single */
 code .cs { color: #999; } /* Comment.Special */
@@ -39,6 +39,7 @@ code .nn { color: #00CCFF; } /* Name.Namespace */
 code .nt { color: #2f6f9f; } /* Name.Tag */
 code .nv { color: #9cdcfe } /* Name.Variable */
 code .ow { color: #000000; } /* Operator.Word */
+code .o { color: #d4d4d4; } /* Operator.Word */
 code .p { color: #d4d4d4 }
 code .w { color: #bbbbbb } /* Text.Whitespace */
 code .mf { color: #FF6600 } /* Literal.Number.Float */
@@ -47,7 +48,7 @@ code .mi { color: #FF6600 } /* Literal.Number.Integer */
 code .mo { color: #FF6600 } /* Literal.Number.Oct */
 code .sb { color: #ce9178 } /* Literal.String.Backtick */
 code .sc { color: #ce9178 } /* Literal.String.Char */
-code .sd { color: #ce9178; font-style: italic } /* Literal.String.Doc */
+code .sd { color: #d4d4d4 } /* Literal.String.Doc */
 code .s1 { color: #ce9178 } /* Literal.String.Double */
 code .s2 { color: #ce9178 } /* Literal.String.Double */
 code .se { color: #ce9178; } /* Literal.String.Escape */

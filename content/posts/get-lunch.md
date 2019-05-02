@@ -2,6 +2,7 @@
 title: "Choosing Lunch through PowerShell"
 date: 2018-10-23T12:18:11+02:00
 summary: "In the start of the past summer, a coworker and I were discussing our lunch plans for the day, not quite able to decide what to go for. I jokingly said that I should just write a PowerShell script to decide for us, an idea that I took to the next level."
+draft: false
 ---
 
 If you're not interested in the how or the why, skip ahead to the [project on GitHub](https://github.com/MrEpiX/Get-Lunch).
