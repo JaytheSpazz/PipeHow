@@ -2,7 +2,7 @@
 title: "Working with Numeral Systems in PowerShell"
 date: 2019-05-02T16:45:10+02:00
 summary: ""
-draft: true
+draft: false
 ---
 
 Sometimes you need to work with number systems other than our good old decimal base 10. There are various ways to do this depending on what your goal is, and today I will list a few easy ways and some more ambitious ones.
