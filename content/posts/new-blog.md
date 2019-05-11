@@ -2,6 +2,19 @@
 title: "Serverless Blogging using Hugo in Azure"
 date: 2019-04-28T23:30:53+02:00
 summary: "I always wanted a website to manage on my own, so with some inspiration and interest in trying out something completely out of my comfort zone I re-created my blog using Hugo, Azure and GitHub, with a custom domain name!"
+description: "Making a blog using Hugo, Azure Storage Static Website, GitHub, Azure DevOps Pipelines, Azure CDN Endpoints and Cloudflare!"
+keywords:
+- Blog
+- Azure
+- DevOps
+- Pipelines
+- Static
+- Website
+- Hugo
+- Continuous
+- Integration
+- Delivery
+- CICD
 draft: false
 ---
 
@@ -26,21 +39,21 @@ You might be able to solve the hosting puzzle without creating an Azure CDN, but
 
 Below are my DNS settings in Cloudflare, note that you need to replace the blue CDN name with your own Azure CDN configured against your static website endpoint. Something to note here is that you need to make sure your DNS records are managing both DNS and HTTP proxy (CDN) (seen on the orange clouds), otherwise Cloudflare won't be able to manage your traffic.
 
-![Cloudflare DNS Settings](/img/get-blog/cloudflare_dns.png)
+![Cloudflare DNS Settings](/img/new-blog/cloudflare_dns.png)
 
 I originally wanted to make ```pipehow.tech``` the main address, and not ```www.pipehow.tech```, but at least to my understanding it's tricky to make that work because of how the root of the domain can't have a CNAME record of its own, better explanations can be found online with [this article](https://medium.freecodecamp.org/why-cant-a-domain-s-root-be-a-cname-8cbab38e5f5c) being a good start. Unless you have a CNAME record mapped to your Azure CDN endpoint you can't create a custom domain, which practically means that you while you can create ```www.pipehow.tech``` as a custom domain in Azure, ```pipehow.tech``` won't work.
 
-![Azure DNS Error](/img/get-blog/azure_dnsrecorderror.png)
+![Azure DNS Error](/img/new-blog/azure_dnsrecorderror.png)
 
 ## HTTPS and Domain Validation
 
 There is however a way to get past this error, and possibly a way to solve the problem. Solving the problem does however rely on you having access to the email address listed on your domain's registration record (WHOIS registrant) that Azure sends the verification email to, and even then this solution is just speculation on my part. In cases where you can't afford any downtime while setting up your custom domain mapping, there is a way to let Azure verify your custom domain connection "without interruptions while the DNS mapping occurs". Following [Microsoft's tutorial](https://docs.microsoft.com/en-us/azure/cdn/cdn-map-content-to-custom-domain) you would create another CNAME record pointing from (in my case) ```cdnverify.www.pipehow.tech``` to ```cdnverify.cdnname.azureedge.net```, which would let me prepare all the settings for www.pipehow.tech without remapping the domain. If I also register ```cdnverify.pipehow.tech``` (notice the lack of "www") to ```cdnverify.cdnname.azureedge.net``` however, it will let me register ```pipehow.tech``` as a new custom domain for my endpoint, but the problem that the previous error message pointed to will still exist.
 
-![Azure Custom Domain](/img/get-blog/azure_registercustomdomain.png)
+![Azure Custom Domain](/img/new-blog/azure_registercustomdomain.png)
 
 This makes step 2 of configuring HTTPS on the custom domain tricky, since Azure cannot automatically validate the setting. Because I didn't set up any email @pipehow.tech I won't be able to verify the domain ownership and therefore I can't explore this further. My solution was instead to set a few extra settings in Cloudflare and to use ```www.pipehow.tech``` as my main website address. Under the Crypto settings I enabled **"Always Use HTTPS"** and **"Automatic HTTPS Rewrites"** and then I set two Page Rules to redirect from ```pipehow.tech``` to ```https://www.pipehow.tech/```, always forcing HTTPS. This meant I didn't need to turn off the security settings on my Azure Storage account, so I went back and enabled it.
 
-![Cloudflare Page Rules](/img/get-blog/cloudflare_pagerules.png)
+![Cloudflare Page Rules](/img/new-blog/cloudflare_pagerules.png)
 
 ## Azure DevOps with CI/CD
 
@@ -48,17 +61,17 @@ Now I had gotten the site working with my previously set goals of the domain and
 
 My choice of platform for code is GitHub, so I created a repository for my blog there and uploaded my blog code there to later give Azure DevOps access to. The first step was to create a Build Pipeline, and since I'm not experienced with YAML configurations I used the classic editor to create the pipeline. I authorized Azure to access my GitHub account, selected GitHub and my new blog repository and clicked continue to configure the process. After creating the new pipeline I changed a few more settings in the first step **"Get sources"** to include submodules since I experienced trouble with loading the Hugo theme the first time I built the blog.
 
-![Build Pipeline Source](/img/get-blog/azuredevops_buildpipelinesource.png)
+![Build Pipeline Source](/img/new-blog/azuredevops_buildpipelinesource.png)
 
 I clicked the plus on the first job agent and added the two build tasks. The first one is [the Hugo extension in Azure DevOps](https://marketplace.visualstudio.com/items?itemName=giuliovdev.hugo-extension) that lets you build your Hugo website as a pipeline task. I had trouble with adding the extension after installing it, if you experience the same issue you can try installing a second random extension to see if you can then add Hugo, that solved the problem for me. You can then simply uninstall the second extension. The second task is Publish Build Artifacts, which outputs the generated blog as an artifact of the build, accessible from the release pipeline we're creating next to deploy the blog. Below are the build pipeline settings, after a successful build you can download the artifact under the summary tab to confirm that the contents are valid before deploying it, this let me catch a mistake I had made with my URL in the Hugo task settings.
 
-![Build Pipeline Settings](/img/get-blog/azuredevops_buildpipeline.png)
+![Build Pipeline Settings](/img/new-blog/azuredevops_buildpipeline.png)
 
 Before creating our Release Pipeline to deploy the blog we need to enable continuous integration, this is done under the Triggers tab when editing the build pipeline and makes sure that the build pipeline will run every time you push new code to the specified repository. Confirm that the build pipeline does what you want by running it manually. If your build is successful and the resulting artifact is a properly generated blog, let's move on to the last step.
 
 # Deploying the Blog
 Start by creating a new Release Pipeline, also with an empty job. Add an artifact and specify it to be from the build pipeline we created just before, then click the Tasks tab and add a task to the agent job in the first stage, the one and only task you will need is Azure File Copy.
 
-![Release Pipeline Settings](/img/get-blog/azuredevops_releasepipeline.png)
+![Release Pipeline Settings](/img/new-blog/azuredevops_releasepipeline.png)
 
 That's it! There are a few pitfalls if you want to stray from the templated path and customize things, but it's a great opportunity to learn some new technologies if you're thinking of creating your blog or migrating an old one!

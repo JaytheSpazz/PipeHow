@@ -1,0 +1,26 @@
+<script type="application/ld+json">
+{
+    "@context" : "http://schema.org",
+    "@type" : "BlogPosting",
+    "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ .Site.BaseURL }}"
+    },
+    "articleSection" : "{{ .Section }}",
+    "name" : "{{ if .IsHome }}{{ .Site.Params.TitleText }}{{ else }}{{ .Title }}{{ end }}",
+    "headline" : "{{ if .IsHome }}{{ .Site.Params.TitleText }}{{ else }}{{ .Title }}{{ end }}",
+    "description" : "{{ if .IsHome }}{{ .Site.Params.Introduction }} {{ .Site.Params.Description }}{{ else }}{{ .Description }}{{ end }}",
+    "inLanguage" : "en-US",
+    "author" : "{{ .Site.Params.Author }}",
+    "creator" : "{{ .Site.Params.Author }}",
+    "publisher": "{{ .Site.Params.Author }}",
+    "accountablePerson" : "{{ .Site.Params.Author }}",
+    "copyrightHolder" : "{{ .Site.Params.Author }}",
+    "copyrightYear" : "{{ .Date.Format "2006" }}",
+    "datePublished": "{{ .Date.Format "Mon, Jan 2, 2006" }}",
+    "dateModified" : "{{ .Date.Format "Mon, Jan 2, 2006" }}",
+    "url" : "{{ .Permalink }}",
+    "wordCount" : "{{ .WordCount }}",
+    "keywords" : "{{ if .Keywords -}}{{ delimit .Keywords ", " }} {{- else -}} {{ .Site.Params.keywords }} {{- end }}",
+}
+</script>

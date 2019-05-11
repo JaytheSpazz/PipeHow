@@ -6,10 +6,15 @@ disqusShortname = "emanuelpalm"
 pygmentsCodeFences = true
 pygmentsUseClasses = true
 pygmentsCodefencesGuessSyntax = true
+disableKinds = ["taxonomy", "taxonomyTerm"]
+enableRobotsTXT = true
 
 [params]
+titleText = "PipeHow"
 introduction = "PowerShell, C#, .NET - and other tidbits of fun."
 description = "Website and blog of Swedish IT viking Emanuel Palm about his quest for knowledge - and the silly adventures along the way."
+keywords = "C#, PowerShell, .NET, DotNet, Blog, Automation, Technology, Development"
+location = "Stockholm, Sweden"
 githubURL = "https://github.com/MrEpiX"
 linkedinURL = "https://www.linkedin.com/in/emanuel-palm-099878b2/"
 author = "Emanuel Palm"
