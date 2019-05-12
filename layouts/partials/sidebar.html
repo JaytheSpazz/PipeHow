@@ -3,10 +3,10 @@
     <div class="sidebar-about">
       <a href="{{ .Site.BaseURL }}" class="no-underline"><h1>{{ .Site.Title }}</h1></a>
       <p class="lead">
-      {{ with .Site.Params.introduction }} {{.}} {{ else }}An elegant open source and mobile first theme for <a href="http://hugo.spf13.com">hugo</a> made by <a href="http://twitter.com/mdo">@mdo</a>. Originally made for Jekyll.{{end}}
+      {{ .Site.Params.introduction }}
       </p>
       <p class="desc">
-      {{ with .Site.Params.description }} {{.}} {{ end }}
+      {{ .Site.Params.description }}
       </p>
     </div>
 

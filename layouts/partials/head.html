@@ -7,7 +7,7 @@
 
   <!-- Set Title -->
   {{ if .IsHome -}}
-  <title>{{ .Site.Title }}</title>
+  <title>{{ .Site.Params.TitleHeader }} {{ .Site.Title }}</title>
   {{- else -}}
   <title>{{ .Title }} {{ .Site.Title }}</title>
   {{- end }}

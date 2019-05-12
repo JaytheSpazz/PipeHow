@@ -4,13 +4,14 @@ date: 2019-05-02T16:45:10+02:00
 summary: "Sometimes you need to work with number systems other than our good old decimal base 10. There are various ways to do this depending on what your goal is and in this post I will list a few easy ways and some more ambitious ones."
 description: "Working with numeral systems like binary and hexadecimal in PowerShell!"
 keywords:
-- Blog
 - PowerShell
-- Numeral
-- Systems
+- Convert
 - Binary
 - Hexadecimal
 - Decimal
+- Numeral
+- Systems
+- Blog
 draft: false
 ---
 

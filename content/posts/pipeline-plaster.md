@@ -1,8 +1,8 @@
 ---
-title: "Building PowerShell modules in Azure DevOps with Plaster and gyPSum"
+title: "Building PowerShell Modules in Azure Pipelines"
 date: 2019-05-10T19:45:10+02:00
 summary: "You've heard of them, you've seen them, maybe you've created some before! Modules in PowerShell are created and used in different ways, let's take it to the next level using Azure, Pipelines, Plaster and gyPSum!"
-description: "Making PowerShell Modules using Azure DevOps, Pipelines, Plaster and gyPSum!"
+description: "Creating PowerShell Modules using Azure DevOps, Pipelines, Plaster and gyPSum!"
 keywords:
 - Blog
 - Azure
@@ -24,7 +24,7 @@ Deciding on a naming convention before you create too many modules is a good ide
 PS PipeHow:\Blog> (Get-Command).Module.Name | Sort-Object -Unique
 ```
 
-Note how it's fairly obvious what type of commands each module contains, strive to name your modules something that represents the type of commands that will reside therein.
+Note how it's often fairly obvious what type of commands each module contains, this is something to keep in mind when creating a module. Strive to name your modules something that represents the type of commands that will reside therein.
 
 PowerShell has loads of built-in modules that you use every day, in fact all Cmdlets reside in a module of some sort. [Modules can vary in size and form](https://docs.microsoft.com/en-us/powershell/developer/module/understanding-a-windows-powershell-module) but most frequently you will find them written as ```.psm1``` files, containing "public" (I'll get back to this) PowerShell functions that are exported from the module file. Modules can also be written as a binary module using C# (that's a future blog post!) or created dynamically during runtime using the ```New-Module``` command.
 
