@@ -21,6 +21,6 @@
     "dateModified" : "{{ .Date.Format "Mon, Jan 2, 2006" }}",
     "url" : "{{ .Permalink }}",
     "wordCount" : "{{ .WordCount }}",
-    "keywords" : "{{ if .Keywords -}}{{ delimit .Keywords ", " }} {{- else -}} {{ .Site.Params.keywords }} {{- end }}",
+    "keywords" : "{{ if .Keywords -}}{{ delimit .Keywords ", " }} {{- else -}} {{ .Site.Params.keywords }} {{- end }}"
 }
 </script>
