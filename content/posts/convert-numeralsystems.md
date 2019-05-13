@@ -5,9 +5,9 @@ summary: "Sometimes you need to work with number systems other than our good old
 description: "Working with numeral systems like binary and hexadecimal in PowerShell!"
 keywords:
 - PowerShell
-- Convert
 - Binary
 - Hexadecimal
+- Convert
 - Decimal
 - Numeral
 - Systems
