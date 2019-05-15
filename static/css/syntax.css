@@ -1,4 +1,5 @@
 /* Most colors taken from Visual Studio Code dark theme */
+.chroma { color: #d4d4d4; }
 code .hll { background-color: #1e1e1e }
 code .c { color: #608b4e; } /* Comment */
 code .err { color: #d4d4d4; } /* Error */
