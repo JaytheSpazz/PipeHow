@@ -19,3 +19,6 @@ location = "Stockholm, Sweden"
 author = "Emanuel Palm"
 githubURL = "https://github.com/MrEpiX"
 linkedinURL = "https://www.linkedin.com/in/emanuel-palm-099878b2/"
+
+[blackfriday]
+hrefTargetBlank = true

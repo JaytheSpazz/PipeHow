@@ -1,6 +1,6 @@
 ---
-title: "Building PowerShell Modules using Plaster"
-date: 2019-05-16T08:12:10+02:00
+title: "Building PowerShell Modules with Plaster"
+date: 2019-05-15T22:12:10+02:00
 summary: "You've heard of them, you've seen them, maybe you've created some before! Modules in PowerShell are created and used in different ways. In the first part we'll take a look at creating a module using Plaster and gyPSum and in the second part we'll do it again but using Azure DevOps pipelines to automate it!"
 description: "Creating PowerShell Modules using Plaster and gyPSum!"
 keywords:
@@ -147,6 +147,7 @@ function Test-AccountNumber
     [CmdletBinding()]
     param(
         [Parameter(
+            Mandatory,
             Position = 0,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
@@ -158,7 +159,7 @@ function Test-AccountNumber
 }
 ```
 
-Our function takes an string as input, checks if it contains exactly 8 digits and outputs true or false. We could have made it take an integer as input, but that would mean numbers starting with zero might make it not behave the way we expect it to. Functions in PowerShell output anything you write to the pipeline, so the three lines below would result in the same functionality.
+Our function takes a mandatory string as input, checks if it contains exactly 8 digits and outputs true or false. We could have made it take an integer as input, but that would mean numbers starting with zero might make it not behave the way we expect it to. Functions in PowerShell output anything you write to the pipeline, so the three lines below would result in the same functionality.
 
 ```ps1
 [bool]($AccountNumber -match '^\d{8}$')
@@ -174,12 +175,14 @@ function Add-MoneyToAccount
     [CmdletBinding()]
     param(
         [Parameter(
+            Mandatory,
             Position = 0,
             ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [string]$AccountNumber,
 
         [Parameter(
+            Mandatory,
             Position = 1,
             ValueFromPipelineByPropertyName)]
         [ValidateRange(1,500)]
@@ -194,12 +197,14 @@ function Remove-MoneyFromAccount
     [CmdletBinding()]
     param(
         [Parameter(
+            Mandatory,
             Position = 0,
             ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [string]$AccountNumber,
 
         [Parameter(
+            Mandatory,
             Position = 1,
             ValueFromPipelineByPropertyName)]
         [ValidateRange(1,500)]
@@ -220,6 +225,7 @@ function Get-AccountBalance
     [CmdletBinding()]
     param(
         [Parameter(
+            Mandatory,
             Position = 0,
             ValueFromPipeline,
             ValueFromPipelineByPropertyName)]
@@ -247,11 +253,13 @@ function New-MoneyTransaction
     [CmdletBinding()]
     param(
         [Parameter(
+            Mandatory,
             Position = 0,
             ValueFromPipelineByPropertyName)]
         [int]$Amount,
 
         [Parameter(
+            Mandatory,
             Position = 1,
             ValueFromPipelineByPropertyName)]
         [ValidateScript({
@@ -264,6 +272,7 @@ function New-MoneyTransaction
         [string]$FromAccountNumber,
 
         [Parameter(
+            Mandatory,
             Position = 2,
             ValueFromPipelineByPropertyName)]
         [ValidateScript({
@@ -388,6 +397,26 @@ Running ```Invoke-Build``` in the root directory of the project will create a ``
 
 ```ps1
 PS PipeHow:\Blog\PSBanking> Invoke-Build
+PS PipeHow:\Blog\PSBanking> Import-Module .\bin\PSBanking\1.0.0\PSBanking.psd1
+PS PipeHow:\Blog\PSBanking> Get-Command -Module PSBanking
+
+CommandType Name                 Version Source
+----------- ----                 ------- ------
+Function    Get-AccountBalance   1.0.0   PSBanking
+Function    New-MoneyTransaction 1.0.0   PSBanking
 ```
 
-This might have been a fairly long read, but hopefully you didn't find it to be a very complex one. In the next part we'll take it to the next level and look at recreating the steps in Azure Pipelines, to build the module when new code is pushed to the project repository that we'll create!
+As you can see, if we import the ```.psd1``` file the only functions that were exported from the module were the ones we put in the ```Public``` folder. And since we're both curious if it actually works with the internal usage of our private functions, let's test it out!
+
+```ps1
+PS PipeHow:\Blog\PSBanking> Get-AccountBalance '12345678'
+1238
+
+PS PipeHow:\Blog\PSBanking> New-MoneyTransaction 150 '12345678' '87654321' -Verbose
+VERBOSE: Removing 150 moneys from account 12345678.
+VERBOSE: Adding 150 moneys to account 87654321.
+```
+
+We specified mandatory and positional parameters all throughout the module functions as well as validation, which you can really appreciate once you're on the using side of it, even if it's some extra lines of code. 
+
+This might have been a fairly long read, but hopefully you didn't find it to be a too very complex one because in the next part we'll take it to the next level! We'll look at recreating the steps in Azure Pipelines to build the module when new code is pushed to the GitHub repository that we'll create for the project!
