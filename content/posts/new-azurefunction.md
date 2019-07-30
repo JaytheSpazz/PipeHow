@@ -1,6 +1,6 @@
 ---
 title: "Azure Functions with PowerShell Core"
-date: 2019-07-30T19:27:00+02:00
+date: 2019-07-30T20:40:00+02:00
 summary: "We'll go through how to create a simple PowerShell Azure Function that calls an API with the key stored in an Azure Key Vault, and then how to call it from somewhere else!"
 description: "Building Azure Functions using PowerShell Core!"
 keywords:
@@ -11,7 +11,9 @@ keywords:
 - API
 - Key
 - Vault
-draft: true
+- Secret
+- App Service
+draft: false
 ---
 
 [Azure Functions](https://azure.microsoft.com/en-in/services/functions/) are so-called serverless applications you can build in the web as backends for your mobile, web or on-premises applications. A very good use of functions are as web service wrappers, for example for other APIs so that you can safely store developer credentials and secrets in your own service outside of the client or application you deploy to users. In this case we'll create a simple function that wraps an arbitrary API where the API key is stored in a separate Azure Key Vault.
