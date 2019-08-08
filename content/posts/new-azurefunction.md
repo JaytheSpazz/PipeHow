@@ -66,7 +66,7 @@ By default our function won't be able to read the secrets from the key vault, so
 
 Browse to the access policies of your key vault and add a new one. Search for your function app and select the permissions you want your function to have, remember the principle of least privilege for best practices!
 
-Now that our function has access to read our secret, let's get the identifier from the key vault and then connect it to our function. In the key vault, click **Secrets**, **YourSecret**, **CurrentVersion** and copy the **Secret Identifier** which looks like **<span>https://</span>yourkeyvault.vault.azure.net/secrets/YourSecret/aaaabbbbccccddddeeeeffff11112222**.
+Now that our function has access to read our secret, let's get the identifier from the key vault and then connect it to our function. In the key vault, click **Secrets**, **YourSecret**, **CurrentVersion** and copy the **Secret Identifier** which looks like **https://<i></i>yourkeyvault.vault.azure.net/secrets/YourSecret/aaaabbbbccccddddeeeeffff11112222**.
 
 Head back to the function in the portal and enter the **Configuration**. Under **Application Settings** you can create your own values that will be added as environment variables to your function. We can connect an application setting to our secret in the vault by entering the our secret identifier as the value, in the form of **@Microsoft.KeyVault(SecretUri=YourSecretIdentifier)**.
 
