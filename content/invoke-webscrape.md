@@ -1,7 +1,7 @@
 ---
 title: "Web Scraping with PowerShell"
 date: 2019-08-19T22:05:00+02:00
-summary: ""
+summary: "If you've ever been in a situation where you would like to index a lot of pages on a webpage or get the data straight from the HTML because the site doesn't have an API, PowerShell could have been of help. If you haven't been in the situation yet, check out these simple tricks you can use to gather raw data straight from the web!"
 description: "Scraping web pages using PowerShell!"
 keywords:
 - Blog
