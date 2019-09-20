@@ -17,7 +17,7 @@ description = "Website and blog of Swedish IT viking Emanuel Palm about his ques
 keywords = "C#, PowerShell, .NET, DotNet, Blog, Automation, Technology, Development"
 location = "Stockholm, Sweden"
 author = "Emanuel Palm"
-githubURL = "https://github.com/MrEpiX"
+githubURL = "https://github.com/PalmEmanuel"
 linkedinURL = "https://www.linkedin.com/in/palmemanuel/"
 
 [blackfriday]
