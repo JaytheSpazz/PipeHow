@@ -3,7 +3,6 @@ languageCode = "en-us"
 title = "| How"
 theme = "hyde"
 disqusShortname = "emanuelpalm"
-googleAnalytics = "UA-150365830-1"
 pygmentsCodeFences = true
 pygmentsUseClasses = true
 pygmentsCodefencesGuessSyntax = true
@@ -20,6 +19,7 @@ location = "Stockholm, Sweden"
 author = "Emanuel Palm"
 githubURL = "https://github.com/PalmEmanuel"
 linkedinURL = "https://www.linkedin.com/in/palmemanuel/"
+googleAnalyticsCode = "UA-150365830-1"
 
 [blackfriday]
 hrefTargetBlank = true
