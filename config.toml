@@ -3,6 +3,7 @@ languageCode = "en-us"
 title = "| How"
 theme = "hyde"
 disqusShortname = "emanuelpalm"
+googleAnalytics = "UA-150365830-1"
 pygmentsCodeFences = true
 pygmentsUseClasses = true
 pygmentsCodefencesGuessSyntax = true
