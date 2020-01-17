@@ -1,5 +1,5 @@
 ---
-title: "PowerShell Collections: Arrays"
+title: "PowerShell Collections: Array"
 date: 2019-12-19T17:01:00+02:00
 summary: "PowerShell creates arrays for us when we get several results back from a command, but what are our options when explicitly wanting to declare an array, and how do we work with them?"
 description: "Creating arrays in PowerShell!"
