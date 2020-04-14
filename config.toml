@@ -19,6 +19,7 @@ location = "Stockholm, Sweden"
 author = "Emanuel Palm"
 githubURL = "https://github.com/PalmEmanuel"
 linkedinURL = "https://www.linkedin.com/in/palmemanuel/"
+twitterURL = "https://twitter.com/PalmEmanuel"
 googleAnalyticsCode = "UA-150365830-1"
 
 [blackfriday]
