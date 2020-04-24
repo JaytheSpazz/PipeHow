@@ -1,5 +1,5 @@
 ---
-title: "Hosting a Private PSRepository in Azure"
+title: "Creating a Private PSRepository in Azure"
 date: 2020-04-22T15:28:00+02:00
 summary: "In the Azure DevOps suite we have a service called Artifacts, which lets you create your own package feeds. It lets you publish your scripts and modules and share them with only a select few people if desired."
 description: "Creating an internal PowerShell repository in Azure DevOps Artifacts."
@@ -41,13 +41,13 @@ There are two main ways to work with the package feed as a PowerShell repository
 
 ### NuGet CLI
 
-The [NuGet CLI](https://docs.microsoft.com/en-us/azure/devops/artifacts/tutorials/private-powershell-library?view=azure-devops#creating-packaging-and-sending-a-module) is what at least one of the articles in the official Microsoft documentation guides you through. It works, and while it might seem intuitive if you've worked with NuGet and .NET before I would like to argue that it doesn't feel natural when working in PowerShell. It requires you to create package files from the module catalogue which you then publish. When I want to publish a new module to my internal repository I would prefer it if I could use a more PowerShell-native way of doing it, avoiding to bring in further dependencies and commands to remember outside of PowerShell.
+The [NuGet CLI](https://docs.microsoft.com/en-gb/nuget/reference/nuget-exe-cli-reference) is what at least [one of the articles](https://docs.microsoft.com/en-us/azure/devops/artifacts/tutorials/private-powershell-library?view=azure-devops#creating-packaging-and-sending-a-module) in the official Microsoft documentation guides you through. It works, and while it might seem intuitive if you've worked with NuGet and .NET before I would like to argue that it doesn't feel natural when working in PowerShell. It requires you to create package files from the module catalogue which you then publish. When I want to publish a new module to my internal repository I would prefer it if I could use a more PowerShell-native way of doing it, avoiding to bring in further dependencies and commands to remember outside of PowerShell.
 
 ### The PowerShellGet module
 
 There is a module called PowerShellGet dedicated to working with PowerShell repositories, modules, scripts and package management. The module is included with both Windows 10 and Windows Server 2016 or newer, as well as any modern PowerShell version, so most likely you already have at least an early version of it installed.
 
-As of writing I'm using the highest live version on PSGallery, version `2.2.4.1`, and I'd recommend you to install it. [Version 3.0 is in preview](https://devblogs.microsoft.com/powershell/powershellget-3-0-preview-1/) however and reworks the entire way that the module works, removing internal dependencies and more. We will go into more detail on this further down.
+As of writing I'm using the highest live version on PSGallery, version `2.2.4.1`, and I'd recommend you to install it. [Version 3.0 is in preview](https://devblogs.microsoft.com/powershell/powershellget-3-0-preview-1/) however and reworks the entire way that the module works, removing dependencies and more. We will go into more detail on this further down.
 
 ## Registering the Repository
 
@@ -57,14 +57,14 @@ In my case I want to register it as a PSRepository for my own computer, but it c
 
 ### NuGet Feed URLs
 
-The PowerShell repository that we're creating uses the NuGet feed in Azure Artifacts, which is also the reason that the NuGet CLI is one of the ways to publish modules for it. PowerShell does not support version 3 feeds for NuGet, so we need to use version 2. We can find our feed address by clicking the "Connect to feed" button in Azure DevOps and clicking "NuGet.exe". The "Project setup" section has an URL that we can use.
+The PowerShell repository that we're creating uses the NuGet feed in Azure Artifacts, which is also the reason that the NuGet CLI is one of the ways to publish modules for it. [PowerShell does not support version 3 feeds for NuGet](https://docs.microsoft.com/en-us/azure/devops/artifacts/tutorials/private-powershell-library?view=azure-devops#connecting-to-the-feed-as-a-powershell-repo), so we need to use version 2. We can find our feed address by clicking the "Connect to feed" button in Azure DevOps and clicking "NuGet.exe". The "Project setup" section has an URL that we can use.
 
 ![Connect to Package Feed](/img/new-psrepository/azure_devops_connectfeed.png)
 
 The feed URL follows a standardized format which can be applied to all PowerShell repositories hosted in Azure Artifacts.
 
 ```PowerShell
-# Version 3 feeds
+# V3 feeds
 
 # My feed URL
 https://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v3/index.json
@@ -73,12 +73,12 @@ https://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v3/
 https://pkgs.dev.azure.com/<organisation>/<project>/_packaging/<feedname>/nuget/v3/index.json
 ```
 
-There are a couple of interesting things I found when trying to overcome the obstacle that is registering the repository in PowerShell, one being that the format obviously is not for version 2.
+There are a couple of interesting things I found when trying to overcome the obstacle that is registering the repository in PowerShell, one being that the format obviously is not for v2.
 
-The version 2 feed is however very similar, you simply swap the `/v3/index.json` to `v2`, without the JSON file reference at the end. The documentation on finding this NuGet endpoint isn't very clear, although there is some information spread throughout some [seemingly outdated articles](https://docs.microsoft.com/en-us/azure/devops/artifacts/nuget/nuget-exe?view=azure-devops).
+The v2 feed is however very similar, you simply swap the `/v3/index.json` to `v2`, without the JSON file reference at the end. The documentation on finding this NuGet endpoint isn't very clear, although there is some information spread throughout some [seemingly outdated articles](https://docs.microsoft.com/en-us/azure/devops/artifacts/nuget/nuget-exe?view=azure-devops).
 
 ```PowerShell
-# Version 2 feeds
+# V2 feeds
 
 # My feed URL
 https://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v2
@@ -186,27 +186,30 @@ Enough URL format talk, let's register the repository in PowerShell now that we 
 
 ### Register-PSRepository
 
-Just for the sake of it, let's compare the results between specifying the project name (or id) and only specifying the organization.
+Registering the repository is done using `Register-PSRepository` and providing the v2 feed URL for both the `-SourceLocation` and `-PublishLocation` parameters.
 
 ```PowerShell
-$V2NoProj = 'https://pkgs.dev.azure.com/pipehow/_packaging/PipeHowFeed/nuget/v2'
+$V2 = 'https://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v2'
+
+# Hashtable with parameters for splatting
 $Params = @{
-    'Name' = 'PipeHowFeed'
+    'Name' = 'PipeHow'
     'InstallationPolicy' = 'Trusted'
-    'SourceLocation' = $V2NoProj
-    'PublishLocation' = $V2NoProj
+    'SourceLocation' = $V2
+    'PublishLocation' = $V2
 }
+
 Register-PSRepository @Params
 ```
 
-The first time we register the repository we will get prompted for a manual browser login using a device code. 
+The first time we register the repository we will get prompted for a manual browser login using a device code.
 
 ```plaintext
 [Minimal] [CredentialProvider]DeviceFlow: https://pkgs.dev.azure.com/pipehow/_packaging/PipeHowFeed/nuget/v2
 [Minimal] [CredentialProvider]To sign in, use a web browser to open the page https://microsoft.com/devicelogin and enter the code CBWSEFM23 to authenticate.
 ```
 
-Even after logging in we will still be hit by an error.
+But after logging in we will be hit by an error.
 
 *Register-PSRepository: The specified repository 'PipeHowFeed' is unauthorized and cannot be registered. Try running with -Credential.*
 
@@ -220,18 +223,18 @@ Something to note from my experience when trying to authenticate with the three 
 
 #### 1. The Device Flow
 
-As we saw from the error message, simply going through the device flow without specifying the `-Credential` parameter didn't seem to work as well as it may have been intended according to the blog post.
+As we saw from the error message, simply going through the device flow without specifying the `-Credential` parameter didn't seem to work as well as it may have been intended according to the blog post. This is because I'm working from my personal computer with a local user.
 
 #### 2. The Credential Parameter
 
-The credential parameter turns out to be the only way to make it work, but what the blog post doesn't mention is that the credential to register the repository using `Register-PSRepository` doesn't need to have a Personal Access Token (PAT) as password, it can also simply contain your password. Storing your password somewhere is of course often considered poor practice, but I thought it was worth noting. I'll come back to the credential parameter further down, as it turned out to be the key to solving the puzzle of making it work using the current version of PowerShellGet.
+The credential parameter turns out to be the only way to make it work, but what the blog post doesn't mention is that the credential to register the repository using `Register-PSRepository` doesn't need to have a [Personal Access Token (PAT)](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops) as password, it can also simply contain your password. Storing your password somewhere is of course often considered poor practice, but I thought it was worth noting. I'll come back to the credential parameter further down, as it turned out to be the key to solving the puzzle of making it work using the current version of PowerShellGet.
 
 #### 3. The Environment Variable
 
 The environment variable `VSS_NUGET_EXTERNAL_FEED_ENDPOINTS` can be set to a JSON configuration confined to one line.
 
 ```JSON
-{"endpointCredentials": [{"endpoint":"https://pkgs.dev.azure.com/yourorganizationname/_packaging/yourfeedname/nuget/v2", "username":"yourusername", "password":"accesstoken"}]}
+{"endpointCredentials": [{"endpoint":"https://pkgs.dev.azure.com/yourorganizationname/_packaging/yourfeedname/nuget/v2", "username":"yourusername", "password":"personalaccesstoken"}]}
 ```
 
 Let's expand it and see what information is required.
@@ -242,49 +245,194 @@ Let's expand it and see what information is required.
         {
             "endpoint": "https://pkgs.dev.azure.com/yourorganizationname/_packaging/yourfeedname/nuget/v2",
             "username": "yourusername",
-            "password": "accesstoken"
+            "password": "personalaccesstoken"
         }
     ]
 }
 ```
 
-The endpoint needs to be set to a valid v2 feed URL, and as I mentioned earlier I only managed to get it working by including the project name or id after the organization.
+The endpoint needs to be set to a valid v2 feed URL, and as I mentioned earlier I only managed to get it working by including the project name or id after the organization.When trying this I simply set it to the URL we found earlier.
 
-This method of authentication looks like a decent option for some cases, assuming we would be comfortable having our PAT in plain text as an environment variable, but unfortunately it turned out that this way of authenticating didn't work either. It does work for a few of the other commands in the PowerShellGet module, but not for `Register-PSRepository`. If you would like to use this way of authentication, I did note that it solves the problem of needing to provide credential for at least `Find-Module` and `Install-Module`, but the repository needs to already be registered.
+This method of authentication looks like a decent option for some cases, assuming we would be comfortable having our PAT in plain text as an environment variable, but unfortunately it turned out that this way of authenticating didn't work either. It does work for a few of the other commands in the PowerShellGet module, but not for `Register-PSRepository`. If you would like to use this way of authentication, I did note that it solves the problem of needing to provide credential for at least the commands `Find-Module` and `Install-Module`, but the repository needs to already be registered.
 
----
+In the end I chose to register my repository by passing a `PSCredential` object containing my account credentials to the command.
 
-Must do it with -Credential unless you're logged into the account on your computer, for example at a work computer.
+```PowerShell
+$Cred = Get-Credential
+$V2 = 'https://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v2'
+$Params = @{
+    'Name' = 'PipeHow'
+    'InstallationPolicy' = 'Trusted'
+    'SourceLocation' = $V2
+    'PublishLocation' = $V2
+    'Credential' = $Cred
+}
+Register-PSRepository @Params
+```
 
-## Avoiding a Personal Access Token
+## Publishing a Module
 
-We keep coming back to needing a PAT, so how do we get one.
+The repository is now added, let's see if we can publish a module to it. How about trying the example module "PSBanking" that we made in a [previous blog post]({{< relref "new-plastermodule.md" >}})?
 
-And can we avoid the requirement somehow? As it's Time-based, security etc
+```PowerShell
+Publish-Module -Path '.\PSBanking' -NuGetApiKey (New-Guid) -Repository PipeHow
+```
 
----
+`Publish-Module` works fine without providing specified credentials, which was a nice surprise. When publishing modules on PowerShell Gallery, the `-NuGetApiKey` would be the API key from your account, but when working with Azure Artifacts we authenticate differently. In our case this parameter can be any string, so I'm simply generating a new GUID.
 
-Credentials or PAT when registering repository | PAT credentials when installing the module
-Inputting credentials every time is a bother
+The module is now uploaded and anyone can use it! Finding the module is easy, simply use `Find-Module` and optionally specify the repository to avoid any possible conflicts.
 
-or
+```plaintext
+PS PipeHow:\Blog> Find-Module -Repository PipeHow
 
-$env:VSS_NUGET_EXTERNAL_FEED_ENDPOINTS
-{"endpointCredentials": [{"endpoint": "https://pkgs.dev.azure.com/advaniase/TeamAutomation/_packaging/PwrOps/nuget/v2","username": "account","password": "PAT"}]}
-this is bad for security
+Version Name      Repository Description
+------- ----      ---------- -----------
+1.0.0   PSBanking PipeHow    A module that pretends to do bank transa…
+```
 
-What if we want to not use a PAT - Let's check out PowerShellGet v3
+Let's try to install our `Install-Module` to confirm it all works as intended.
 
-Works with both v2 endpoints - Both GUID and by Name
+```PowerShell
+Install-Module PSBanking -Repository PipeHow
+```
 
-Need to install higher versions of PowerShellGet than 1.0, recommend going for highest live version (before going into v3 details)
+**PackageManagement\Install-Package : Unable to resolve package source [...].**
 
+This is when I encountered the main problem, where I spent the most time trying to figure out what I did wrong. After testing several ways of adding the repository with different credentials and URLs it turns out that to install the module we need to provide credentials again. Not just any credentials though, this time we need a `PSCredential` object with the account as username and a [PAT with the rights to read, write and manage our feeds and packages](https://docs.microsoft.com/en-us/azure/devops/artifacts/tutorials/private-powershell-library?view=azure-devops#create-a-pat-to-get-command-line-access-to-azure-devops-services) as the password.
 
-v2 legacy endpoint from the v3 JSON, v3 is not supported for powershell (https://docs.microsoft.com/en-us/azure/devops/artifacts/tutorials/private-powershell-library?view=azure-devops#creating-packaging-and-sending-a-module)
-a lot of information mention nuget, PAT and the commandlet asks you for a device code, but none seemed to work
-https://devblogs.microsoft.com/powershell/using-powershellget-with-azure-artifacts/
-PowerShellGet has v3 in preview
+![New Personal Access Token](/img/new-psrepository/azure_devops_newpat.png)
 
-Mention the /Packages JSON blob metadata info thing
+The important thing when creating the token is to make sure to save it somewhere securely. In my case I directly entered it into `Get-Credential` in PowerShell so that I could provide it as part of the credential for `Install-Module`, but I also knew that I wanted to see if I could find another solution, so a temporary variable was fine for me.
 
-Does Version 3 feeds work with v3 PowerShellGet?
+```PowerShell
+$PATCred = Get-Credential
+Install-Module PSBanking -Repository PipeHow -Credential $PATCred
+```
+
+In a few of the ways in which I tried to make this work, `Install-Module` did not throw any errors, but when I looked closer with the `-Verbose` and `-Debug` parameters on the command I could see that it found the module, tried to download it three times and then seemed to simply give up. Using the credential with a PAT was the only way I found that worked.
+
+```plaintext
+PS PipeHow:\Blog> Get-InstalledModule PSBanking
+
+Version Name      Repository Description
+------- ----      ---------- -----------
+1.0.0   PSBanking PipeHow    A module that pretends to do bank transa…
+```
+
+As we can see, the module was successfully installed and can now be used. Even if I would like to avoid the requirement for a PAT somehow, it seems to be the way to do it. Since it's generated once and not saved anywhere where you can read it, you will need to keep track of it somewhere secure. You will also need to keep track of the validity of the token, since it's time-based.
+
+## Avoiding the Device Code
+
+The thing that still bothered me about the solution even if we managed to use the repository is that once in a while, probably when an internal token expires, the commands pointing to our added repository will prompt you for a new device code login in the browser. This would ruin any attempt at automation since it requires manual intervention.
+
+### PowerShellGet v3
+
+Since the problem seemed to stem from how PowerShellGet was written to manage authentication, its' dependency on NuGet and more, let's take a look at installing version 3 of the module, and see if it can help us out.
+
+```plaintext
+PS PipeHow:\Blog> Find-Module PowerShellGet -AllowPrerelease
+
+Version     Name          Repository Description
+-------     ----          ---------- -----------
+3.0.0-beta1 PowerShellGet PSGallery  PowerShell module with commands for discovering, installing, updating and publishing the PowerShell artifacts like Modules, DSC Resources, Role Capabilities and Scripts.
+```
+
+Since version 3 is not released yet, we need to specify the `-AllowPrerelease` switch to search for modules that are still in preview. Since it seemed to find what we needed, let's install it. Running `Find-Module` before `Install-Module` is a good way to know that you're installing the right module, since the PowerShell Gallery could potentially contain malicious code.
+
+```PowerShell
+Install-Module PowerShellGet -AllowPrerelease -Force
+```
+
+Specifying `-Force` in this case lets it install side-by-side with my current version. Let's see if we can find out what changed.
+
+```plaintext
+PS PipeHow:\Blog> Get-Command -Module PowerShellGet
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Function        Find-Command                                       2.2.4.1    PowerShellGet
+Function        Find-DscResource                                   2.2.4.1    PowerShellGet
+Function        Find-Module                                        2.2.4.1    PowerShellGet
+Function        Find-RoleCapability                                2.2.4.1    PowerShellGet
+Function        Find-Script                                        2.2.4.1    PowerShellGet
+Function        Get-CredsFromCredentialProvider                    2.2.4.1    PowerShellGet
+Function        Get-InstalledModule                                2.2.4.1    PowerShellGet
+Function        Get-InstalledScript                                2.2.4.1    PowerShellGet
+Function        Get-PSRepository                                   2.2.4.1    PowerShellGet
+Function        Install-Module                                     2.2.4.1    PowerShellGet
+Function        Install-Script                                     2.2.4.1    PowerShellGet
+Function        New-ScriptFileInfo                                 2.2.4.1    PowerShellGet
+Function        Publish-Module                                     2.2.4.1    PowerShellGet
+Function        Publish-Script                                     2.2.4.1    PowerShellGet
+Function        Register-PSRepository                              2.2.4.1    PowerShellGet
+Function        Save-Module                                        2.2.4.1    PowerShellGet
+Function        Save-Script                                        2.2.4.1    PowerShellGet
+Function        Set-PSRepository                                   2.2.4.1    PowerShellGet
+Function        Test-ScriptFileInfo                                2.2.4.1    PowerShellGet
+Function        Uninstall-Module                                   2.2.4.1    PowerShellGet
+Function        Uninstall-Script                                   2.2.4.1    PowerShellGet
+Function        Unregister-PSRepository                            2.2.4.1    PowerShellGet
+Function        Update-Module                                      2.2.4.1    PowerShellGet
+Function        Update-ModuleManifest                              2.2.4.1    PowerShellGet
+Function        Update-Script                                      2.2.4.1    PowerShellGet
+Function        Update-ScriptFileInfo                              2.2.4.1    PowerShellGet
+Cmdlet          Find-PSResource                                    3.0.0      PowerShellGet
+Cmdlet          Get-PSResource                                     3.0.0      PowerShellGet
+Cmdlet          Get-PSResourceRepository                           3.0.0      PowerShellGet
+Cmdlet          Install-PSResource                                 3.0.0      PowerShellGet
+Cmdlet          Register-PSResourceRepository                      3.0.0      PowerShellGet
+Cmdlet          Save-PSResource                                    3.0.0      PowerShellGet
+Cmdlet          Set-PSResourceRepository                           3.0.0      PowerShellGet
+Cmdlet          Uninstall-PSResource                               3.0.0      PowerShellGet
+Cmdlet          Unregister-PSResourceRepository                    3.0.0      PowerShellGet
+Cmdlet          Update-PSResource                                  3.0.0      PowerShellGet
+```
+
+They weren't joking when they said they reworked the module. None of the old commands remain, and they added new ones. Another thing to note is that the old ones are marked as functions, while the new ones are cmdlets. Functions are written in PowerShell while cmdlets are written in C#, and reading through [the official blog post](https://devblogs.microsoft.com/powershell/powershellget-3-0-preview-1/) it seems they have indeed rewritten the whole thing to abstract the different types of PowerShell resources into a single type. That sounds promising, let's see if we can register a PSResourceRepository!
+
+```PowerShell
+# Adding PSGallery since I didn't have it by default
+Register-PSResourceRepository -PSGallery
+
+# Registering our Azure Artifacts repository with the v2 URL as a trusted repository
+Register-PSResourceRepository -Name PipeHow -URL 'https://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v2' -Trusted
+```
+
+Trying to add the repository went smoothly, note that it still using the v2 endpoint and not v3. In fact it was so quick that I was actually doubting that anything happened, but looking at our registered repositories shows that it did. The registration did not require credentials so I suspect that the authentication occurs when you connect to the repository to find and install modules.
+
+```plaintext
+PS PipeHow:\Blog> Get-PSResourceRepository
+
+Name      Url                                                                             Trusted Priority
+----      ---                                                                             ------- --------
+PipeHow   https://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v2 true    50
+PSGallery https://www.powershellgallery.com/api/v2                                        false   50
+```
+
+The new repositories come with a Priority property.
+
+> "For the cmdlets Register-PSRepository and Set-PSRepository a -Priority parameter allows setting the search order of repositories with a lower value indicating a higher priority. If not specified, the default value is 50. The PSGallery, which is registered by default, has an editable value of 50. If two PSRepositories have the same priority the “Trusted” one will be chosen, if they also have the same level of trust the first one alphabetically will be selected."
+
+```PowerShell
+Find-PSResource PSBanking
+```
+
+**Find-PSResource: Failed to fetch results from V2 feed at 'https\://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v2/FindPackagesById()?id='PSBanking'&semVerLevel=2.0.0' with following message : Response status code does not indicate success: 401 (Unauthorized).**
+
+Using `Find-PSResource` and `Install-PSResource` still requires a credential with PAT. Unfortunately PowerShellGet v3 [hasn't implemented credential persistence yet](https://github.com/PowerShell/PowerShellGet/issues/102), so even if we would use the `-Credential` parameter when registering the repository it would not make a difference, but it might be something to keep track of!
+
+We can then install the module Install-PSResource.
+
+```PowerShell
+# Uninstall the module from the previous installation
+Uninstall-Module PSBanking
+
+# Install the module again using PowerShellGet v3
+Install-PSResource 'PSBanking' -Repository PipeHow -Credential $PATCred
+```
+
+The module is now installed, and you can remove it with `Uninstall-PSResource` if you'd like. The version 3 is still being developed, so among many other things the functionality to publish modules among other things is still not implemented, for now we still need to use `Publish-Module`.
+
+It does however remove the need for the device code for some of the commands!
+
+Stay on the lookout for some more functionality to the v3 module, which may make it more convenient to publish and work with modules in Azure Artifacts. Until then, this is how you do it!

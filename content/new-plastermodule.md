@@ -13,50 +13,50 @@ keywords:
 draft: false
 ---
 
-PowerShell has something beautiful called modules. You can think of them as building blocks that you can use in many projects or share with your friends, a true foundation of working in PowerShell. Generally you have one module per system, integration or area of your project, so if I created a PowerShell module that managed all my bills and bank transfers (technology needs to move faster) I could call it something along the lines of ```PSBanking```.
+PowerShell has something beautiful called modules. You can think of them as building blocks that you can use in many projects or share with your friends, a true foundation of working in PowerShell. Generally you have one module per system, integration or area of your project, so if I created a PowerShell module that managed all my bills and bank transfers (technology needs to move faster) I could call it something along the lines of `PSBanking`.
 
 Deciding on a naming convention before you create too many modules is a good idea, so why don't you run the following line of code in your console and check out the modules already on your computer.
 
 ```ps1
-PS PipeHow:\Blog> (Get-Command).Module.Name | Sort-Object -Unique
+(Get-Command).Module.Name | Sort-Object -Unique
 ```
 
 Note how it's often fairly obvious what type of commands each module contains, this is something to keep in mind when creating a module. Strive to name your modules something that represents the type of commands that will reside therein.
 
-PowerShell has loads of built-in modules that you use every day, in fact all Cmdlets reside in a module of some sort. [Modules can vary in size and form](https://docs.microsoft.com/en-us/powershell/developer/module/understanding-a-windows-powershell-module) but most frequently you will find them written as ```.psm1``` files, containing "public" (I'll get back to this) PowerShell functions that are exported from the module file. Modules can also be written as a binary module using C# (that's a future blog post!) or created dynamically during runtime using the ```New-Module``` command.
+PowerShell has loads of built-in modules that you use every day, in fact all Cmdlets reside in a module of some sort. [Modules can vary in size and form](https://docs.microsoft.com/en-us/powershell/developer/module/understanding-a-windows-powershell-module) but most frequently you will find them written as `.psm1` files, containing "public" (I'll get back to this) PowerShell functions that are exported from the module file. Modules can also be written as a binary module using C# (that's a future blog post!) or created dynamically during runtime using the `New-Module` command.
 
-Making modules is fairly easy, but making them well is a little more tricky because of how you're supposed to create both the code in a ```.psm1``` file or a binary, but also the [module manifest](https://docs.microsoft.com/en-us/powershell/developer/module/how-to-write-a-powershell-module-manifest) ```.psd1``` file containing all the meta data about your module.
+Making modules is fairly easy, but making them well is a little more tricky because of how you're supposed to create both the code in a `.psm1` file or a binary, but also the [module manifest](https://docs.microsoft.com/en-us/powershell/developer/module/how-to-write-a-powershell-module-manifest) `.psd1` file containing all the meta data about your module.
 
-Enter [Plaster](https://github.com/PowerShell/Plaster), a "template-based file and project generator written in PowerShell". In short Plaster is a scaffolding tool, letting you change the way you work when building modules, to (among many other ways outside of the scope of this article) what I would argue is a more tried-and-tested workflow used in traditional programming with a working copy and a build output which you then publish. Together with Plaster we will use [gyPSum](https://github.com/SimonWahlin/gyPSum/tree/master/Module), a Plaster template designed to fit what is considered best practices in the PowerShell comunity when building modules. This will also create a nice structure for our code with folders for our private and public functions as well as for our tests, so go ahead and download that together with Plaster.
+Enter [Plaster](https://github.com/PowerShell/Plaster), a "template-based file and project generator written in PowerShell". In short Plaster is a scaffolding tool, letting you change the way you work when building modules, to (among many other ways outside of the scope of this article) what I would argue is a more tried-and-tested workflow used in traditional programming with a working copy and a build output which you then publish. Together with Plaster we will use [gyPSum](https://github.com/SimonWahlin/gyPSum/tree/master/Module), a Plaster template designed to fit what is considered best practices in the PowerShell community when building modules. This will also create a nice structure for our code with folders for our private and public functions as well as for our tests, so go ahead and download that together with Plaster.
 
 ```ps1
-PS PipeHow:\Blog> Install-Module Plaster
+Install-Module Plaster
 ```
 
-If you aren't able to use ```Install-Module``` you will find links to each of the modules as I introduce them, where you can follow the installation instructions.
+If you aren't able to use `Install-Module` you will find links to each of the modules as I introduce them, where you can follow the installation instructions.
 
 We will need a few more module dependencies before we're ready to get started, so let's install those right away. First up is [Invoke-Build](https://github.com/nightroman/Invoke-Build) which we will use to invoke the module build job from the codebase we will put together. Secondly we have [PowerShellGet](https://docs.microsoft.com/en-us/powershell/module/powershellget), a module with commands to manage modules and scripts among other things. This one is included in Windows 10 among other setups, so chances are you might already have it (and if you don't, running Install-Module might be tricky to begin with), but you can update it if you like. Next there is [ModuleBuilder](https://github.com/PoshCode/ModuleBuilder), not too unsurprisingly also used as part of building our module. Lastly we have [Pester](https://github.com/pester/Pester), our go-to code testing framework in PowerShell.
 
 ```ps1
-PS PipeHow:\Blog> Install-Module InvokeBuild
-PS PipeHow:\Blog> Install-Module PowerShellGet
-PS PipeHow:\Blog> Install-Module ModuleBuilder
-PS PipeHow:\Blog> Install-Module Pester
+Install-Module InvokeBuild
+Install-Module PowerShellGet
+Install-Module ModuleBuilder
+Install-Module Pester
 ```
 
 That's everything for the setup of building our first module using Plaster!
 
 ## Setting up the Project
 
-Let's start by creating a module project using ```Invoke-Plaster``` and specifying our gyPSum template file.
+Let's start by creating a module project using `Invoke-Plaster` and specifying our gyPSum template file.
 
 ```ps1
-PS PipeHow:\Blog> Invoke-Plaster -TemplatePath .\gyPSum\Module -DestinationPath .
+Invoke-Plaster -TemplatePath .\gyPSum\Module -DestinationPath .
 ```
 
 Plaster will greet you with some beautiful ASCII art and ask you to provide information based on the template used, in our case gyPSum. To continue with my earlier example, I'll create the module PSBanking.
 
-```
+```plaintext
   ____  _           _
  |  _ \| | __ _ ___| |_ ___ _ __
  | |_) | |/ _` / __| __/ _ \ `__|
@@ -107,7 +107,7 @@ A Pester test has been created to validate the module's manifest file. Add addit
 
 Long block, I know, but you can safely ignore most of it. It's fairly self-explanatory, so if we move on and check out the destination path we specified we'll see that Plaster has created an empty project for us to fill with great PowerShell code that will be built into our new module. This is when the template really comes into play, and how the workflow of your project changes. Let's have a look at our new folder structure!
 
-```
+```plaintext
 PSBanking/
 ├── .gitignore
 ├── appveyor.yml
@@ -133,13 +133,13 @@ The files that are already there are files that will be used when building the m
 
 ## The Project Structure
 
-Using Plaster with the gyPSum template we will get a working directory with a few folders central to the module we will build. The key difference to how you normally would go about building a module is that with this setup we will split each function into its own ```.ps1``` file. If you've programmed in other languages you'll probably see some of the similarities I mentioned earlier.
+Using Plaster with the gyPSum template we will get a working directory with a few folders central to the module we will build. The key difference to how you normally would go about building a module is that with this setup we will split each function into its own `.ps1` file. If you've programmed in other languages you'll probably see some of the similarities I mentioned earlier.
 
 ### Private
 
-All functions that you would traditionally mark as private should be put here. This means all module-internal functions that the user does not need or should not have access to. One of the main perks compared to a normal ```.psm1``` file is how we make sure that these functions do not end up exported from the module for the user to see.
+All functions that you would traditionally mark as private should be put here. This means all module-internal functions that the user does not need or should not have access to. One of the main perks compared to a normal `.psm1` file is how we make sure that these functions do not end up exported from the module for the user to see.
 
-In our case let's create an example function that the module could call internally. If we're handling imaginary transations it needs to validate an imaginary account number, so our first function should be ```Test-AccountNumber```. It should take an account number as a parameter and return true or false depending on if it matches our imaginary banking system.
+In our case let's create an example function that the module could call internally. If we're handling imaginary transations it needs to validate an imaginary account number, so our first function should be `Test-AccountNumber`. It should take an account number as a parameter and return true or false depending on if it matches our imaginary banking system.
 
 ```ps1
 function Test-AccountNumber
@@ -243,7 +243,7 @@ function Get-AccountBalance
 }
 ```
 
-As you can see, we use the private function Test-AccountNumber in our parameter validation, this is one of the ways we could utilize private functions in our module. The behavior is the same as I mentioned previously, I simply output ```$true``` if we haven't thrown an exception during the account number check.
+As you can see, we use the private function Test-AccountNumber in our parameter validation, this is one of the ways we could utilize private functions in our module. The behavior is the same as I mentioned previously, I simply output `$true` if we haven't thrown an exception during the account number check.
 
 Finally, let's throw together a transaction function for the user.
 
@@ -301,9 +301,9 @@ It's a bit of code for such a small function, but all it really does is take two
 
 If you haven't checked out Pester before, this will only be a brief overview of the framework. I plan to blog about it in the future, so look for those posts if they exist when you read this, otherwise simply google it!
 
-The tests folder will all tests for our functions. The tests will be run when building the module, so we can make sure that everything is working as intended. There are generally two categories of tests, ```Unit``` and ```Integration```. In this project we'll only be Unit testing the code since there's no environment to actually do integration tests against, so we'll place our tests in the Unit folder.
+The tests folder will all tests for our functions. The tests will be run when building the module, so we can make sure that everything is working as intended. There are generally two categories of tests, `Unit` and `Integration`. In this project we'll only be unit testing the code since there's no environment to actually do integration tests against, so we'll place our tests in the "Unit" folder.
 
-For the sake of simplicity I'll place all the tests into the file ```PSBanking.Tests.ps1``` that Plaster generated for us. You could also decide to split the tests differently, in larger projects it's a good idea to for example split up test files per module even if you don't build them using Plaster. Something to keep in mind is that if we want to test the private functions of the module we need to either ```Mock``` their use, or use the function InModuleScope to run the code inside the scope of the module since the private functions are not exported and accessible otherwise.
+For the sake of simplicity I'll place all the tests into the file `PSBanking.Tests.ps1` that Plaster generated for us. You could also decide to split the tests differently, in larger projects it's a good idea to for example split up test files per module even if you don't build them using Plaster. Something to keep in mind is that if we want to test the private functions of the module we need to either `Mock` their use, or use the function InModuleScope to run the code inside the scope of the module since the private functions are not exported and accessible otherwise.
 
 Enough chatting, let's look at the test code.
 
@@ -384,7 +384,7 @@ Describe 'PSBanking Function Tests' -Tag 'Unit' {
 }
 ```
 
-I realize that some tests are not true Unit tests since they call the functions without mocking external sources, for example Get-Random, but that's not the focus of this post so I will leave that for another day. The gist of it is that I make sure to test the different scenarios of each function such as true or false, or if it throws or not depending on the values provided through the parameters. I also do some simple mocking in the test for ```New-MoneyTransaction``` to show how you can test the module's private functions.
+I realize that some tests are not true unit tests since they call the functions without mocking external sources, for example Get-Random, but that's not the focus of this post so I will leave that for another day. The gist of it is that I make sure to test the different scenarios of each function such as true or false, or if it throws or not depending on the values provided through the parameters. I also do some simple mocking in the test for `New-MoneyTransaction` to show how you can test the module's private functions.
 
 ### Classes
 Classes is another folder that you can utilize, but nothing we will touch on in the scope of this demo. The purpose of the folder is to contain declarations of [PowerShell Classes](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes), but since we're not using any classes we'll move on.
@@ -393,7 +393,7 @@ Classes is another folder that you can utilize, but nothing we will touch on in 
 
 That's it really!
 
-Running ```Invoke-Build``` in the root directory of the project will create a ```bin``` folder containing the module for use, distribution or publishing. Plaster handles all the formatting as well as most of the documentation of the module through the generated manifest, although some things can or should be tweaked for an optimal result.
+Running `Invoke-Build` in the root directory of the project will create a `bin` folder containing the module for use, distribution or publishing. Plaster handles all the formatting as well as most of the documentation of the module through the generated manifest, although some things can or should be tweaked for an optimal result.
 
 ```ps1
 PS PipeHow:\Blog\PSBanking> Invoke-Build
@@ -406,7 +406,7 @@ Function    Get-AccountBalance   1.0.0   PSBanking
 Function    New-MoneyTransaction 1.0.0   PSBanking
 ```
 
-As you can see, if we import the ```.psd1``` file the only functions that were exported from the module were the ones we put in the ```Public``` folder. And since we're both curious if it actually works with the internal usage of our private functions, let's test it out!
+As you can see, if we import the `.psd1` file the only functions that were exported from the module were the ones we put in the `Public` folder. And since we're both curious if it actually works with the internal usage of our private functions, let's test it out!
 
 ```ps1
 PS PipeHow:\Blog\PSBanking> Get-AccountBalance '12345678'

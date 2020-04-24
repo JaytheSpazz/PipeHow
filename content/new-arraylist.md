@@ -17,13 +17,13 @@ keywords:
 draft: false
 ---
 
-Last time we took a look at the most basic type of collection in PowerShell, and explored how we could specify exactly what type of array we wanted. It turned out that arrays are extremely slow when modifying size, as they are actually static structures that need to be re-created every time we add an element. This post will look at the first alternative to arrays that one usually encounters: `ArrayList`.
+[Last time]({{< relref "new-array.md" >}}) we took a look at the most basic type of collection in PowerShell, and explored how we could specify exactly what type of array we wanted. It turned out that arrays are extremely slow when modifying size, as they are actually static structures that need to be re-created every time we add an element. This post will look at the first alternative to arrays that one usually encounters: `ArrayList`.
 
-**A disclaimer before diving into the `ArrayList`, however, is that it is deprecated and the recommendation from Microsoft is that it should not be used for any new development. I'm writing about it to help explore its basic functionality and the differences between collections as you are likely to encounter it in existing scripts, but will follow this post by writing about recommended alternatives.**
+**A disclaimer before diving into the ArrayList, however, is that it is deprecated and the recommendation from Microsoft is that it should not be used for any new development. I'm writing about it to help explore its basic functionality and the differences between collections as you are likely to encounter it in existing scripts, but will follow this post by writing about recommended alternatives.**
 
 Let's start with how to create an ArrayList in PowerShell, and then discuss how it works.
 
-As with all things in PowerShell there are a couple of different ways to create an ArrayList. 
+As with all things in PowerShell there are a couple of different ways to create an ArrayList.
 
 ```ps1
 PS PipeHow:\Blog> $ArrayList = New-Object System.Collections.ArrayList
