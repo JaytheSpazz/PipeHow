@@ -26,7 +26,7 @@ Do make sure to include the whole file structure in the repository, including th
 
 Since we didn't include any [PowerShell Classes](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes) our Classes folder is empty. We will need the Classes folder to build our module but if you've worked with Git before you might know that Git does not keep track of empty repositories. To make sure that it was added to my repository I created a file called ```.gitkeep``` in the Classes folder, which is one of the few tricks you can use to get around this problem without weighing down the repository with files without a purpose. The file itself is as simple as it looks, it's an empty file only there to make Git accept the Classes folder into the repository.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog\PSBanking\Source\Classes> New-Item .gitkeep
 ```
 

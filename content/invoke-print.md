@@ -27,13 +27,13 @@ Not too long ago I got tasked with the challenge of assembling a picture in Powe
 
 There are a few built-in commands that have something to do with printing, as we can see by running `Get-Command` and filtering on things that contain "Print".
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Get-Command *Print*
 ```
 
 There are quite a few results, most of them are functions in PowerShell but there are also some actual executable programs that come with windows. After looking through the list I realized that there weren't a lot of functions that could help me out, aside from potentially `Out-Printer` which I decided to check out more closely.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Get-Help Out-Printer -Examples
 ```
 
@@ -49,14 +49,14 @@ I had printed a card from the actual badge system to a PDF to have as comparison
 
 The first thing to do when working with the printing classes is to tell PowerShell that we want to import the `[System.Drawing]` namespace, where our printing functionality resides. We also need to create a [PrintDocument](https://docs.microsoft.com/en-us/dotnet/api/system.drawing.printing.printdocument) to configure for printing and eventually draw our images onto.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Add-Type -AssemblyName System.Drawing 
 PS PipeHow:\Blog> $PrintDocument = New-Object System.Drawing.Printing.PrintDocument
 ```
 
 If we look at the properties of our newly created print document we will see the different settings we can configure.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $PrintDocument | Get-Member
 
    TypeName: System.Drawing.Printing.PrintDocument
@@ -93,7 +93,7 @@ As the badge card that I was setting out to recreate and print was in a landscap
 
 To find the different sizes you can look through the `PrinterSettings.PaperSizes`, from where you can choose one and set to your `DefaultPageSettings.PaperSize`.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $PrintDocument.PrinterSettings.PrinterName = 'Microsoft Print to PDF'
 PS PipeHow:\Blog> $PrintDocument.DocumentName = "PipeHow Print Job"
 PS PipeHow:\Blog> $PrintDocument.DefaultPageSettings.PaperSize = $PrintDocument.PrinterSettings.PaperSizes | Where-Object { $_.PaperName -eq 'Letter' }
@@ -102,7 +102,7 @@ PS PipeHow:\Blog> $PrintDocument.DefaultPageSettings.Landscape = $true
 
 There weren't any more settings from the print document that I ended up using among the ones we listed, but there are a few more things that we will need from the list, specifically the events.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $PrintDocument | Get-Member -MemberType Event
 
    TypeName: System.Drawing.Printing.PrintDocument
@@ -119,7 +119,7 @@ In PowerShell you can bind traditional .NET events to objects using scriptblocks
 
 We will need a picture to print, so I will import an example picture as a byte array using a method from the `[System.IO.File]` namespace.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $PictureByteArray = [System.IO.File]::ReadAllBytes($Path)
 ```
 
@@ -127,7 +127,7 @@ In my task I had a second picture which was a template to place the picture on w
 
 You'll see me mixing the ways I create objects in PowerShell between using `New-Object` and the `[Class]::new()` constructor. Both have the same functionality but sometimes when I pass new objects as parameters I like to use the .NET version to avoid needing extra parentheses around the `New-Object` calls.
 
-```ps1
+```PowerShell
 $PrintDocument.add_PrintPage({
     # Create an ImageConverter to convert our byte array into a Bitmap for drawing
     $ImageConverter = New-Object System.Drawing.ImageConverter
@@ -166,7 +166,7 @@ $PrintDocument.add_PrintPage({
 
 After defining the code to be run when we print our document, let's try it!
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $PrintDocument.Print()
 ```
 

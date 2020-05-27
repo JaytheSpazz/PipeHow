@@ -25,7 +25,7 @@ We can create the storage account using either the portal or PowerShell. Note th
 
 I will assume you have navigated the portal before and created a storage account, from there you can simply scroll down, add a table and generate a SAS token. If you only want to see how to actually work with the table using PowerShell you can head directly to the **Using Azure Table** section. Let's take a look at creating it using PowerShell instead and to do that we'll need a few Azure modules. You can download them individually but for simplicity I install the ```Az``` module which includes most of the whole suite, then we also need the module ```AzTable```.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Install-Module Az
 PS PipeHow:\Blog> Install-Module AzTable
 ```
@@ -34,7 +34,7 @@ We now have a lot of commands that we can run but before we start creating the s
 
 Once logged in we're mostly interested in commands in the module called ```Az.Storage```.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Get-Command *Table* -Module Az.Storage
 
 CommandType     Name                                               Version    Source
@@ -51,13 +51,13 @@ Cmdlet          Set-AzStorageTableStoredAccessPolicy               1.3.0      Az
 
 We'll need a few others, but ```New-AzStorageTable``` seems like a good place to start. We now need to figure out what kind of information we need to use it. 
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Get-Help New-AzStorageTable -Examples
 ```
 
 We have a couple of simple examples, but if you try running one there will be an error complaning about storage context. This is because we first need a storage account to use as context for the new table. You can create a context simply by referencing a storage account's context property, but I'll demonstrate how to create one using one of the access keys of the storage account.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> New-AzResourceGroup -Name 'TableRG' -Location 'westeurope'
 PS PipeHow:\Blog> New-AzStorageAccount -ResourceGroupName 'TableRG' -Name 'pipehowtablestorage' -SkuName Standard_LRS -Location 'westeurope' -Kind StorageV2
 PS PipeHow:\Blog> $Key = (Get-AzStorageAccountKey -ResourceGroupName 'TableRG' -Name 'pipehowtablestorage')[0].Value
@@ -75,7 +75,7 @@ We created the resources in west europe, currently the closest region to where I
 
 Now that we have our storage context we can create our table!
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> New-AzStorageTable -Name 'PipeHowTable' -Context $Context
 ```
 
@@ -85,7 +85,7 @@ Before we move onto the exercise of writing to our table we want to make sure th
 
 This is a token based on one of our access keys, such as the one we used to create our context. A SAS token can be seen as an access key, but when creating it we specify how long it will be valid and what type of access it will grant. Since it is based on one of the access keys for the account we can also invalidate the SAS token whenever we want by refreshing the key it was based on, but be aware that this will invalidate all SAS tokens based on that key.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $SAS = New-AzStorageAccountSASToken -Service Table -ResourceType Container,Service,Object -StartTime (Get-Date) -ExpiryTime (Get-Date).AddHours(6) -Context $Context -Permission 'rwdlau'
 ```
 
@@ -106,21 +106,21 @@ Using only our SAS key we can now work with our table without being connected to
 
 Let's pretend we're someone else who doesn't have access, to do this we can disconnect our Azure account and remove the context we retrieved using one of the access keys.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Disconnect-AzAccount
 PS PipeHow:\Blog> Remove-Variable Context
 ```
 
 We can then create a new context using our SAS token, and then get the table that we will be working with.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Context = New-AzStorageContext -StorageAccountName 'pipehowtablestorage' -SasToken $SAS
 PS PipeHow:\Blog> $Table = Get-AzStorageTable -Context $Context
 ```
 
 Working with the table is now as easy as calling a simple command. Let's try adding some information, note that we need to use the CloudTable property when performing operations on the table.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Add-AzTableRow -Table $Table.CloudTable -PartitionKey 'Result' -RowKey ((New-Guid).Guid) -property @{ Result = 'Success'; Source = 'PipeHow' }
 PS PipeHow:\Blog> Add-AzTableRow -Table $Table.CloudTable -PartitionKey 'Result' -RowKey ((New-Guid).Guid) -property @{ Result = 'Failure'; Source = 'PipeHow' }
 ```
@@ -133,7 +133,7 @@ We can now go into the Storage Explorer of our storage account and look at our t
 
 We can of course also retrieve the data using PowerShell.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Get-AzTableRow -Table $Table.CloudTable
 
 Result         : Success
@@ -153,14 +153,14 @@ Etag           : W/"datetime'2019-06-30T12%3A46%3A08.3207654Z'"
 
 We can also create filters, either using methods from classes the Table namespace in Azure or by simply writing the string yourself. The two lines below create the same filter.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Filter = [Microsoft.Azure.Cosmos.Table.TableQuery]::GenerateFilterCondition("Result",[Microsoft.Azure.Cosmos.Table.QueryComparisons]::Equal,"Success")
 PS PipeHow:\Blog> $Filter = "Result eq 'Success'"
 ```
 
 If we then want to remove all entries that were successful because we're only interested in the ones that failed we can do so by using ```Remove-AzTableRow```. The ```Etag``` property is required when removing the table row, so piping the results from ```Get-AzTableRow``` is the simplest.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Get-AzTableRow -Table $Table.CloudTable -CustomFilter $Filter | Remove-AzTableRow -Table $Table.CloudTable
 ```
 

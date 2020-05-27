@@ -17,7 +17,7 @@ PowerShell has something beautiful called modules. You can think of them as buil
 
 Deciding on a naming convention before you create too many modules is a good idea, so why don't you run the following line of code in your console and check out the modules already on your computer.
 
-```ps1
+```PowerShell
 (Get-Command).Module.Name | Sort-Object -Unique
 ```
 
@@ -29,7 +29,7 @@ Making modules is fairly easy, but making them well is a little more tricky beca
 
 Enter [Plaster](https://github.com/PowerShell/Plaster), a "template-based file and project generator written in PowerShell". In short Plaster is a scaffolding tool, letting you change the way you work when building modules, to (among many other ways outside of the scope of this article) what I would argue is a more tried-and-tested workflow used in traditional programming with a working copy and a build output which you then publish. Together with Plaster we will use [gyPSum](https://github.com/SimonWahlin/gyPSum/tree/master/Module), a Plaster template designed to fit what is considered best practices in the PowerShell community when building modules. This will also create a nice structure for our code with folders for our private and public functions as well as for our tests, so go ahead and download that together with Plaster.
 
-```ps1
+```PowerShell
 Install-Module Plaster
 ```
 
@@ -37,7 +37,7 @@ If you aren't able to use `Install-Module` you will find links to each of the mo
 
 We will need a few more module dependencies before we're ready to get started, so let's install those right away. First up is [Invoke-Build](https://github.com/nightroman/Invoke-Build) which we will use to invoke the module build job from the codebase we will put together. Secondly we have [PowerShellGet](https://docs.microsoft.com/en-us/powershell/module/powershellget), a module with commands to manage modules and scripts among other things. This one is included in Windows 10 among other setups, so chances are you might already have it (and if you don't, running Install-Module might be tricky to begin with), but you can update it if you like. Next there is [ModuleBuilder](https://github.com/PoshCode/ModuleBuilder), not too unsurprisingly also used as part of building our module. Lastly we have [Pester](https://github.com/pester/Pester), our go-to code testing framework in PowerShell.
 
-```ps1
+```PowerShell
 Install-Module InvokeBuild
 Install-Module PowerShellGet
 Install-Module ModuleBuilder
@@ -50,7 +50,7 @@ That's everything for the setup of building our first module using Plaster!
 
 Let's start by creating a module project using `Invoke-Plaster` and specifying our gyPSum template file.
 
-```ps1
+```PowerShell
 Invoke-Plaster -TemplatePath .\gyPSum\Module -DestinationPath .
 ```
 
@@ -141,7 +141,7 @@ All functions that you would traditionally mark as private should be put here. T
 
 In our case let's create an example function that the module could call internally. If we're handling imaginary transations it needs to validate an imaginary account number, so our first function should be `Test-AccountNumber`. It should take an account number as a parameter and return true or false depending on if it matches our imaginary banking system.
 
-```ps1
+```PowerShell
 function Test-AccountNumber
 {
     [CmdletBinding()]
@@ -161,7 +161,7 @@ function Test-AccountNumber
 
 Our function takes a mandatory string as input, checks if it contains exactly 8 digits and outputs true or false. We could have made it take an integer as input, but that would mean numbers starting with zero might make it not behave the way we expect it to. Functions in PowerShell output anything you write to the pipeline, so the three lines below would result in the same functionality.
 
-```ps1
+```PowerShell
 [bool]($AccountNumber -match '^\d{8}$')
 return [bool]($AccountNumber -match '^\d{8}$')
 Write-Object [bool]($AccountNumber -match '^\d{8}$')
@@ -169,7 +169,7 @@ Write-Object [bool]($AccountNumber -match '^\d{8}$')
 
 Let's add two more private functions before we move onto the public ones, that actually moves our imaginary money. We'll also put a limit per transaction to 500 of whatever arbitrary currency this would use, let's say this was a specified need from the bank manager that ordered the module since their policy says they have to call the bank to transfer larger amounts.
 
-```ps1
+```PowerShell
 function Add-MoneyToAccount
 {
     [CmdletBinding()]
@@ -219,7 +219,7 @@ function Remove-MoneyFromAccount
 
 All the functions that should be exported from the module, or visible to the user, should be put in the public folder. Other than that our setup is the same, so let's create two more functions.
 
-```ps1
+```PowerShell
 function Get-AccountBalance
 {
     [CmdletBinding()]
@@ -247,7 +247,7 @@ As you can see, we use the private function Test-AccountNumber in our parameter 
 
 Finally, let's throw together a transaction function for the user.
 
-```ps1
+```PowerShell
 function New-MoneyTransaction
 {
     [CmdletBinding()]
@@ -307,7 +307,7 @@ For the sake of simplicity I'll place all the tests into the file `PSBanking.Tes
 
 Enough chatting, let's look at the test code.
 
-```ps1
+```PowerShell
 Describe 'PSBanking Function Tests' -Tag 'Unit' {
     BeforeAll {
         Import-Module "$ModulePath\$ModuleName.psd1"
@@ -395,7 +395,7 @@ That's it really!
 
 Running `Invoke-Build` in the root directory of the project will create a `bin` folder containing the module for use, distribution or publishing. Plaster handles all the formatting as well as most of the documentation of the module through the generated manifest, although some things can or should be tweaked for an optimal result.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog\PSBanking> Invoke-Build
 PS PipeHow:\Blog\PSBanking> Import-Module .\bin\PSBanking\1.0.0\PSBanking.psd1
 PS PipeHow:\Blog\PSBanking> Get-Command -Module PSBanking
@@ -408,7 +408,7 @@ Function    New-MoneyTransaction 1.0.0   PSBanking
 
 As you can see, if we import the `.psd1` file the only functions that were exported from the module were the ones we put in the `Public` folder. And since we're both curious if it actually works with the internal usage of our private functions, let's test it out!
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog\PSBanking> Get-AccountBalance '12345678'
 1238
 

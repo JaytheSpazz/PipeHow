@@ -29,7 +29,7 @@ PowerShell has several ways of getting data from a source on the web, be it a no
 
 `Invoke-WebRequest` is just what it sounds like, it creates and sends a request to a specified web address and then returns a response. Think of it like opening a web page in your browser, you get all the HTML on the address you put in but also all the metadata that the browser handles for you to present the site.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Invoke-WebRequest 'www.google.com'
 
 StatusCode          : 200
@@ -56,7 +56,7 @@ We can of course save the response in a variable and expand it to get our data, 
 
 `Invoke-RestMethod` behaves and is used in the same way as `Invoke-WebRequest`, the big difference is that you only get the content and no metadata. If the data is in JSON, it will also automatically parse it into an object. This is especially handy when working with REST APIs that respond with data in JSON, and removes the need to run the content of the response through `ConvertFrom-Json` afterwards.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Invoke-RestMethod 'www.google.com'
 
 <!doctype html><html itemscope="" itemtype="http://schema.org/WebPage" lang="sv"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"><meta content=...
@@ -66,7 +66,7 @@ We ran the same command, but this time we only got the actual HTML data of [www.
 
 I like using the [JSONPlaceholder API](https://jsonplaceholder.typicode.com/) when demonstrating API requests, it's a fake API that can be used to test your code.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Invoke-WebRequest 'https://jsonplaceholder.typicode.com/posts/1'
 
 StatusCode        : 200
@@ -146,7 +146,7 @@ Looking at the HTML of the site in either PowerShell or by using a browser we ca
 
 Knowing this lets us create a regular expression to gather these values from a pattern, which we can use with the `-match` operator in PowerShell.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $HTML = Invoke-RestMethod 'http://quotes.toscrape.com/'
 PS PipeHow:\Blog> $HTML -match '<span class="text" itemprop="text">.*</span>'
 True
@@ -162,7 +162,7 @@ Name    Value
 
 We can do better though, to filter out exactly what we need we can create a so-called named group.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $HTML -match '<span class="text" itemprop="text">(?<quote>.*)<\/span>'
 True
 ```
@@ -184,7 +184,7 @@ Using the same procedure we can create a pattern that gathers all values that we
 
 I won't go deep into how regex works in this post, that's for another time, but the following pattern matches the structure of each quote.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Pattern = '<span class="text" itemprop="text">(?<quote>.*)<\/span>\n.*<small class="author" itemprop="author">(?<author>.*)<\/small>(\n.*){5}<meta class="keywords" itemprop="keywords" content="(?<tags>.*)"'
 PS PipeHow:\Blog> $HTML -match $Pattern
 True
@@ -204,7 +204,7 @@ author  Albert Einstein
 
 The problem is that even when we run it on all our HTML data we only get a single quote matched, this is because `-match` only returns a single match, the first one. There are other ways to match by regex in PowerShell as well which lets us get all matches, we can either use `Select-String` with the parameter `-AllMatches` and then look at the `Matches` property of the return value, or run the .NET version `[regex]`.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $AllMatches = ($HTML | Select-String $Pattern -AllMatches).Matches
 PS PipeHow:\Blog> $AllMatches = ([regex]$Pattern).Matches($HTML)
 ```
@@ -229,7 +229,7 @@ Value    : <span class="text" itemprop="text">“The world as we have created it
 
 We're only interested in the matched named groups, so all we need is some magic to get those from each quote. To do this we can loop through all matches and save a custom object of each quote to an array, and we're done.
 
-```ps1
+```PowerShell
 $QuoteList = foreach ($Quote in $AllMatches)
 {
     [PSCustomObject]@{
@@ -265,7 +265,7 @@ You can manage a continuous session between requests with both of the cmdlets th
 
 Let's use the same site again and try looking at our options for logging in.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $URL = 'http://quotes.toscrape.com'
 PS PipeHow:\Blog> $Site = Invoke-WebRequest $URL
 PS PipeHow:\Blog> $Site
@@ -303,14 +303,14 @@ Here we can see that we seem to have no forms to fill out and no input fields, b
 
 Something to be aware of is that the properties `Forms` and `InputFields` may still have content even if it doesn't display when looking at the object itself. Let's have a look at the link and also make sure we're not missing any fields to fill on the launch page.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Site.Forms
 PS PipeHow:\Blog> $Site.InputFields
 ```
 
 Looks like there are actually no forms or fields. This matches our expectations since there are no visible ones when visiting the main page in a browser either, but it's a good habit to look through the properties so we know what we have to work with.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Site.Links | Where-Object innerText -eq 'Login'
 
 innerHTML : Login
@@ -325,7 +325,7 @@ We can see that our link has a property called `href`, if you've ever written HT
 
 We will use the `href` value of the link we found and simply add it onto our base URL in a string, then use `Invoke-WebRequest` again onto our new compounded URL. Then we'll have a look at the properties to see if we can find any new fields or forms. Let's also take the opportunity to create a continous web session that we will use for future web requests, this is done using the `-SessionVariable` parameter in which we specify the name of a variable we want to store our new session in, in our case we'll have a new variable called `$DemoSession` afterwards.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $LoginPath = ($Site.Links | Where-Object innerText -eq 'Login').href
 PS PipeHow:\Blog> $Site = Invoke-WebRequest "$URL$LoginPath" -SessionVariable DemoSession
 PS PipeHow:\Blog> $Site | Select-Object Forms,InputFields
@@ -348,7 +348,7 @@ There are a few interesting things to note here. Firstly, it shows that the `Act
 
 Something more to note is that the `Forms` property is actually a list, so to make sure to get everything right we will access the fields of the first form found on the page, which also happens to be the only one. You access the fields just as you do with values in a hashtable.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Site.Forms[0].Fields['username'] = 'PipeHow'
 PS PipeHow:\Blog> $Site.Forms[0].Fields['password'] = 'AnyPasswordWorks'
 PS PipeHow:\Blog> $Site.Forms[0].Fields
@@ -362,7 +362,7 @@ password   AnyPasswordWorks
 
 Great! Now all we need to do is post this back to the website and make sure to use the session that we created so that we can keep browsing the site once logged in. The body of the post will be the entire modified response of the previous web request, in our case our `$Site` variable that we've added our credentials into.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Action = $Site.Forms[0].Action
 PS PipeHow:\Blog> $Site = Invoke-WebRequest "$URL$Action" -Method Post -Body $Site -WebSession $DemoSession
 ```
@@ -371,7 +371,7 @@ Even though the login action had the same path as our previous link, I used the 
 
 If everything worked as expected, as it does in the browser, we should have been redirected to the main page with one of the links now being "Logout" instead.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Site.Links | Where-Object innerText -eq 'Logout'
 
 innerHTML : Logout
@@ -384,7 +384,7 @@ href      : /logout
 
 We successfully logged in! We can keep using our web session to navigate deeper into the site if we like, and we'll keep being logged in as we do. Let's click another link such as the "Next" one and see if we still have the logout button, that means we kept our session.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Site.Links | Where-Object innerText -like 'Next*'
 
 innerHTML : Next <SPAN aria-hidden=true>→</SPAN>
@@ -400,7 +400,7 @@ PS PipeHow:\Blog> $Site = Invoke-WebRequest "$URL$NextPath" -WebSession $DemoSes
 
 We'll verify that we ended up on a different page by exploring the destination of this page's "Next" button, and making sure that we still have a link to logout through.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $Site.Links | Where-Object innerText -like 'Next*'
 
 innerHTML : Next <SPAN aria-hidden=true>→</SPAN>

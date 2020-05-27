@@ -19,7 +19,7 @@ Sometimes you need to work with number systems other than our good old decimal b
 
 Since PowerShell is built with a strong connection to the .NET framework (and Core!) we can access the static methods from ```[System.Convert]``` which helps us out in most of the cases, using ```[Convert]``` for short. When using the Convert class we will always need to decide what data type we want our result in. The Convert class has many different integer sizes to convert to, so how do you know which one to use? It depends on how large numbers you want to be able to handle, but generally when talking about integers we actually mean an ```Int32``` which the normal ```[int]``` data type is in fact an alias for. This can be verified by simply writing the data type in the console.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> [int]
 
 IsPublic IsSerial Name  BaseType
@@ -32,7 +32,7 @@ The only downside of using the Convert class is that it only has support for bin
 ## Binary
 Binary is pretty straight forward. If we need to convert to binary we need to handle the result as a string, since PowerShell does not have support for binary itself as a data type yet. Some upcoming changes however are happening in PowerShell 7.0 according to [this pull request](https://github.com/PowerShell/PowerShell/pull/7993) and the fact that [PowerShell is skipping 6.3 straight to 7.0](https://devblogs.microsoft.com/powershell/the-next-release-of-powershell-powershell-7/) which means we might have a way to change that. Meanwhile, we can use the previously mentioned class by specifying our decimal number (you can also pass it as a string) and what base we want to convert to, in this case binary which is base 2.
 
-```ps1
+```PowerShell
 # From Decimal to Binary
 PS PipeHow:\Blog> [Convert]::ToString(13, 2)
 1101
@@ -45,7 +45,7 @@ PS PipeHow:\Blog> [Convert]::ToInt32(1101, 2)
 ## Hexadecimal
 Hexadecimal (not to be confused with ```[int16]```!) is a common numeral system to encounter when working with color values, among other things. When working with colors each byte usually represents the amount of red, green or blue, this is the foundation of the RGB color system. In PowerShell you can write hexadecimal by prepending the number with ```0x```. When converting to hexadecimal we can use the Convert class again.
 
-```ps1
+```PowerShell
 # From Decimal to Hexadecimal
 PS PipeHow:\Blog> [Convert]::ToString(321321, X)
 4e729
@@ -61,21 +61,21 @@ Wait, what happened there? We tried to convert it in the same way as we did with
 
 As we see in the line above, ```0x4e729``` is interpreted as ```321321```. This is correct, but it also means that when we pass it to the method we're telling PowerShell that we want to convert ```321321``` from base 16 which isn't quite what we intend to do.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> [Convert]::ToInt32(321321, 16)
 3281697
 ```
 
 As seen above this will give us an incorrect result, the equivalent of ```0x321321```. To fix it we simply need to pass it as a string so that PowerShell will understand that it's not actually ```321321``` in base 16.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> [Convert]::ToInt32('0x4e729', 16)
 321321
 ```
 
 There are also a few other ways that we can convert to and from hexadecimal using [string formatting](https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings).
 
-```ps1
+```PowerShell
 # From Decimal to Hexadecimal
 PS PipeHow:\Blog> '{0:x}' -f 321321
 4e729
@@ -87,7 +87,7 @@ PS PipeHow:\Blog> [string]::Format('{0:x}', 321321)
 
 You can also use Format-Hex, but do so at your own risk.
 
-```ps1
+```PowerShell
 # Exploring Format-Hex
 PS PipeHow:\Blog> $Hex = Format-Hex -InputObject 321321
 PS PipeHow:\Blog> $Hex
@@ -131,7 +131,7 @@ Format-Hex is as you can see not the most convenient command to use when simply 
 ## Octal
 If you need to work with base 8 you can do it in the same way with the Convert class, converting to an int to octal and a string back to decimal.
 
-```ps1
+```PowerShell
 # From Decimal to Octal
 PS PipeHow:\Blog> [Convert]::ToInt32(707, 8)
 455
@@ -143,7 +143,7 @@ PS PipeHow:\Blog> [Convert]::ToString(455, 8)
 ## Bytes (Base 256)
 While maybe not considered a numeral system, you can convert any number to bytes using the ```[System.Bitconverter]```.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> [BitConverter]::GetBytes(321321)
 41
 231
@@ -156,7 +156,7 @@ Recognize that line of numbers? It's the same one we got from the ```Bytes``` pr
 ## Base 2-36
 If you haven't had enough of the numeral bases available through .NET you can convert between any arbitrary numeral base you want using a couple of functions I adapted from [ss64](https://ss64.com/ps/syntax-base36.html) with support for conversion between any numeral base between 2 and 32. You can add more bases by either mixing upper- and lowercase letters to get more symbols or by definting a system or a standard for your use context that sets what symbols to use when you run out of our alphabetical letters.
 
-```ps1
+```PowerShell
 function ConvertTo-NumeralBase
 {
     <#

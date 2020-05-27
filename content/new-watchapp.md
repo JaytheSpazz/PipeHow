@@ -44,7 +44,7 @@ If your version doesn't seem to match, or if you're running OpenJDK and not gett
 
 If you're running Windows and want to run an emulator to develop against, make sure to disable Hyper-V on your computer. You can easily do this with administrative rights using PowerShell.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Disable-WindowsOptionalFeature -FeatureName Microsoft-Hyper-V-Hypervisor -Online
 ```
 

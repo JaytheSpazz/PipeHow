@@ -25,7 +25,7 @@ Let's start with how to create an ArrayList in PowerShell, and then discuss how 
 
 As with all things in PowerShell there are a couple of different ways to create an ArrayList.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $ArrayList = New-Object System.Collections.ArrayList
 PS PipeHow:\Blog> $ArrayList = [System.Collections.ArrayList]::new()
 ```
@@ -36,7 +36,7 @@ One uses `New-Object` and the other calls the constructor of the class. You're f
 
 So far it's nothing too exciting, but let's have a look at the type and members of it to see if we can spot some differences to a normal `Array`.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $ArrayList.GetType()
 
 IsPublic IsSerial Name                                     BaseType
@@ -50,7 +50,7 @@ Something interesting to note here is that compared to an array, the ArrayList i
 
 You're not wrong! But let's have a look at the type of a normal array first.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> (@()).GetType()
 
 IsPublic IsSerial Name                                     BaseType
@@ -64,7 +64,7 @@ The collection on today's topic is however not strongly typed, and therefore it 
 
 Diving a little deeper, we saw earlier that `ArrayList` inherits directly from `System.Object` while `Object[]` had `System.Array` as it's base type. Last time we looked at the inheritance chain of the results of `Get-Service`, which looked like this:
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> (Get-Service)[0].PSObject.TypeNames
 System.ServiceProcess.ServiceController
 System.ComponentModel.Component
@@ -80,7 +80,7 @@ In .NET there is something called interfaces, not often touched upon in PowerShe
 
 In PowerShell we can find out what interfaces something has implemented by looking at the underlying type.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $ArrayList.GetType().GetInterfaces()
 
 IsPublic IsSerial Name                                     BaseType
@@ -98,7 +98,7 @@ Naming conventions of interfaces dictate that they should start with a capital I
 Next up is of course to compare the interfaces with our good old `Array`. To keep you from scrolling up and down, let's use `Compare-Object`!
 
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Compare-Object (@()).GetType().GetInterfaces() $ArrayList.GetType().GetInterfaces() -IncludeEqual
 
 InputObject                                                     SideIndicator
@@ -124,7 +124,7 @@ Arraylists have plenty of methods you can explore by using `Get-Member`, and whi
 
 You may want to suppress this output unless you're going to use it, which is possible using a few different ways depending on if you're after readability or performance, from top to bottom as follows.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> $ArrayList.Add(1) | Out-Null
 PS PipeHow:\Blog> [void]$ArrayList.Add(1)
 PS PipeHow:\Blog> $null = $ArrayList.Add(1)
@@ -132,7 +132,7 @@ PS PipeHow:\Blog> $null = $ArrayList.Add(1)
 
 Let's finish up with a comparison of performance between an `Array` and an `ArrayList` now that we've gone through some structural differences between the classes.
 
-```ps1
+```PowerShell
 function New-LargeArray {
     param([int]$Size)
     $Array = @()
@@ -154,7 +154,7 @@ function New-LargeArrayList {
 
 Above are a couple of functions just like in the last post, to help us measure the performance when adding a lot of elements to the two types of collections.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Measure-Command { $MyArray = New-LargeArray 50000 }
 
 Days              : 0

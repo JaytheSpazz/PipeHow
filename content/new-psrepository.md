@@ -423,7 +423,7 @@ Find-PSResource PSBanking
 
 **Find-PSResource: Failed to fetch results from V2 feed at 'https\://pkgs.dev.azure.com/pipehow/PSRepository/_packaging/PipeHowFeed/nuget/v2/FindPackagesById()?id='PSBanking'&semVerLevel=2.0.0' with following message : Response status code does not indicate success: 401 (Unauthorized).**
 
-In PowerShellGet version 3 it seems that both find and installing resources require a credential with PAT, compared to the version 2. Unfortunately PowerShellGet v3 [hasn't implemented credential persistence yet](https://github.com/PowerShell/PowerShellGet/issues/102), so even if we would use a PAT token when registering the repository it would not make a difference, but it might be something to keep track of!
+In PowerShellGet version 3 it seems that both find and installing resources require a credential with PAT, compared to the version 2. Unfortunately as of writing PowerShellGet v3 [hasn't implemented credential persistence yet](https://github.com/PowerShell/PowerShellGet/issues/102), so even if we would use a PAT token when registering the repository it would not make a difference, but it might be something to keep track of!
 
 Installing the module is simple with `Install-PSResource`, and there is no longer any device code prompt!
 

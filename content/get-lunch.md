@@ -21,7 +21,7 @@ In the start of the past summer, a coworker and I were discussing our lunch plan
 
 I started listing restaurants in an array...
 
-```ps1
+```PowerShell
 $Restaurants = @(
 "Decent Burger Place",
 "Close-by Buffé",
@@ -36,7 +36,7 @@ On [Google’s Cloud Platform](https://console.cloud.google.com/apis/) you can s
 
 Using the API is generally done in JSON, which PowerShell manages very well through ConvertFrom-Json and ConvertTo-Json. A quick example of how to get latitude and longitude through the API using Invoke-WebRequest:
 
-```ps1
+```PowerShell
 $GeoResult = Invoke-WebRequest -Method Get -ContentType "application/json" -Uri "$URL/geocode/json?address=$Address&key=$APIKey" | ConvertFrom-Json
 $GeoResult.results.geometry.location.lat
 $GeoResult.results.geometry.location.lng
@@ -44,7 +44,7 @@ $GeoResult.results.geometry.location.lng
 
 There are a few ways of finding nearby restaurants, either get restaurants within a certain radius, or the closest ones from a location. I found that using the parameter `` ```rankby=distance` and `type=restaurant` would give me the 20 closest, which was a good start for my idea.
 
-```ps1
+```PowerShell
 $NearbyResult = Invoke-WebRequest -Method Get -ContentType "application/json" -Uri "$URL/place/nearbysearch/json?oe=utf-8&language=sv&location=$($Latitude),$($Longitude)&type=restaurant&rankby=distance&key=$APIKey" | ConvertFrom-Json
 ```
 
@@ -54,7 +54,7 @@ I implemented a while loop that sends requests until the token is null, with a s
 
 *There is a short delay between when a next_page_token is issued, and when it will become valid. Requesting the next page before it is available will return an INVALID_REQUEST response.*
 
-```ps1
+```PowerShell
 $Token = $NearbyResult.next_page_token
 
 # loop through the next_page_tokens to get 40 more restaurants, you can only get 3 "pages"
@@ -71,7 +71,7 @@ while ($Token)
 
 “That’s it!”, I thought after populating a list of restaurants, adding filtering on restaurants currently open, sorting it randomly and selecting a restaurant.
 
-```ps1
+```PowerShell
 $Restaurant = $Results | Where-Object { $_.opening_hours.open_now -eq $true } | Select-Object -ExpandProperty name -Unique | Sort-Object { Get-Random } | Select-Object -First 1
 ```
 
@@ -88,7 +88,7 @@ After shamelessly stealing pictures and HTML layout online, I managed to scratch
 
 Here is some code I add to the body through a loop that goes through each restaurant provided to Send-LunchEmail.ps1:
 
-```ps1
+```PowerShell
 $InfoHTML = @"
 <td align="center" valign="middle" width="50%"><a href="$($Item.Website)"><span style="color: #$($TextColor)">$($Item.Name) ★$($Item.Rating)★</span></a></td>
 <td align="center" valign="middle" width="50%"><span style="color: #$($TextColor); text-decoration-line: underline;">$($Item.Time) ($($Item.Distance))</span></td>

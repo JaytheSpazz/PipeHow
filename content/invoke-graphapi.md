@@ -97,7 +97,7 @@ The grant type decides the auth flow, we are using `client_credentials` to let t
 
 We now have what we need to retrieve a token, so let's assemble a body for our token request.
 
-```ps1
+```PowerShell
 # Create a hashtable for the body, the data needed for the token request
 # The variables used are explained above
 $Body = @{
@@ -128,7 +128,7 @@ We now have a graph token! The response contains metadata such as expiration tim
 
 Now that we have a token we can simply send the token in the headers of our API request to read or modify whichever resource the token grants us access to, in this case to read the directory. As an example we can send a request to the `/users` endpoint.
 
-```ps1
+```PowerShell
 $Headers = @{
     'Authorization' = "Bearer $($AuthResponse.access_token)"
 }

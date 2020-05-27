@@ -41,7 +41,7 @@ That's enough to get started! While it may not be very interesting, you can run 
 
 The superior way is of course to send a request to the endpoint using PowerShell, either through a GET or a POST where we can send a convenient hashtable that we convert to Json.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Invoke-RestMethod 'http://localhost:7071/api/HttpTrigger?name=GET'
 Hello GET
 PS PipeHow:\Blog> Invoke-RestMethod 'http://localhost:7071/api/HttpTrigger' -Method Post -Body (@{'name'='POST'} | ConvertTo-Json)
@@ -72,7 +72,7 @@ Head back to the function in the portal and enter the **Configuration**. Under *
 
 To make sure it works we can go back to our function code and edit the body of the output.
 
-```ps1
+```PowerShell
 if ($name) {
     $status = [HttpStatusCode]::OK
     $body = "Hello $name, the secret is $($env:YourSecret)"
@@ -81,7 +81,7 @@ if ($name) {
 
 If we now deploy the function to our app in Azure and test our function in the same way as previously we should see that the function has access to read our secrets. This means our function script will not need to store anything in plain text, and situations where secrets are compromised are more easily manageable through the rights that we assigned.
 
-```ps1
+```PowerShell
 PS PipeHow:\Blog> Invoke-RestMethod 'https://yourfunction.azurewebsites.net/api/HttpTrigger?name=PipeHow&code=aaaaBBBBccccDDDD/aaaabbbbccccDDDDEEEEFFFFGGGGhhhh/aaaa=='
 Hello PipeHow, the secret is YourSecretValue
 ```
