@@ -190,10 +190,10 @@ PS PipeHow:\Blog> [string]::IsNullOrWhiteSpace("    ")
 True
 ```
 
-We can see all static members of a class by using `Get-Member` on an object and specifying the parameter `-Static`.
+We can see all static members of a class by using `Get-Member` on the class and specifying the parameter `-Static`.
 
 ```plaintext
-PS PipeHow:\Blog> "ExampleString" | Get-Member -Static
+PS PipeHow:\Blog> [string] | Get-Member -Static
 
    TypeName: System.String
 
