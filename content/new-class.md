@@ -1,18 +1,23 @@
 ---
 title: "PowerShell Classes and Enums"
-date: 2020-05-27T10:25:00+02:00
-summary: "Classes are an often overlooked tool in PowerShell, familiar for programmers but foreign and confusing for those new to the world of code. There are often alternatives to writing a class but there are also situations where it shines."
+date: 2020-05-27T20:28:00+02:00
+summary: "Classes are an often overlooked tool in PowerShell, familiar for programmers but sometimes foreign and confusing for those new to the world of PowerShell. There are often alternatives to writing classes but there are also situations where it shines. In this post we'll go through how to create one so that you can learn some of the strengths!"
 description: "PowerShell classes and enums for directly binding behavior and validation to your data structure!"
 keywords:
 - Blog
 - PowerShell
 - Class
 - Classes
+- Method
+- Get-Member
 - Enum
 - Enums
+- Bit
+- Flags
+- Bitflags
 - Structured
 - Data
-draft: true
+draft: false
 ---
 
 Run a command with me.
@@ -23,7 +28,7 @@ Get-Help 'about_Classes'
 
 This could have been the whole blog post. There is so much useful information in [Microsoft's documentation](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes), directly integrated with PowerShell's help system.
 
-Classes were added in PowerShell 5 and the feature lets people familiar with traditional object-oriented programming get to know PowerShell from a different angle. Desired State Configuration makes use of classes, and there are many areas where problems where a PowerShell class could be a solution. But when is it the right one?
+Classes were added in PowerShell 5 and the feature lets people familiar with traditional object-oriented programming get to know PowerShell from a different angle. [Desired State Configuration](https://docs.microsoft.com/en-us/powershell/scripting/dsc/overview/overview) makes use of classes, and there are many areas where writing a PowerShell class could be a solution. But when is it the right one?
 
 I've seen classes used in different ways, both where they solved a problem in a very elegant and structured way, but also where they could have been replaced by a simple, more clearly defined PowerShell function. It can sometimes be hard to know when to look at classes as an option.
 
@@ -49,13 +54,13 @@ class MyClass {
 }
 ```
 
-It's a basic example which has a name property and lets you change the name. A class is defined with a the keyword `class` followed by the name of the class and curly brackets. Everything belonging to the class is defined within the scope of those brackets, such as properties and methods.
+A class is defined with a the keyword `class` followed by the name of the class and curly brackets. Everything belonging to the class is defined within the scope of those brackets, such as properties and methods. Above is a basic example which has a name property and lets you change it using a method.
 
 ### Methods
 
 *Methods, you say? I've seen those when running `Get-Member` but compared to properties I've never actually created one. How do they work?*
 
-You can think of a method as a function belonging to an object. A member function, so to say. An example could be the objects returned from `Get-ChildItem` when run in a file system.
+You can think of a method as a function belonging to an object. A member function, so to say. Let's look at the objects returned from `Get-ChildItem` when run in a file system as an example.
 
 ```PowerShell
 PS PipeHow:\Blog> $Files = Get-ChildItem 'C:\Temp' -File
@@ -97,13 +102,13 @@ Replace                   Method     System.IO.FileInfo Replace(string destinati
 ToString                  Method     string ToString()
 ```
 
-There are many methods on the `FileInfo` objects we found, this makes sense since they represent files and we can do a lot of things with them. The methods are often ways to modify the specific object, in this case we could among other things copy the file, move it or delete it using its member methods.
+Using `Get-Member` we can find many methods on the `FileInfo` objects, this makes sense since they represent files and there are many operations we can do with them. The methods are often ways to modify the specific object, in this case we could among other things copy the file, move it or delete it using its member methods.
 
-A method has an orderly structure that makes it quick to see what data it returns, if any, and what parameters it takes. Looking at the method `CopyTo` from above we can see that it has two variants, so-called overloads. Overloads are used when the same function can be run with different parameters, similar to parameter sets for PowerShell functions.
+A method has an orderly structure that makes it quick to see what data it returns, if any, and what parameters it takes. Looking at the method `CopyTo` from above we can see that it has two variants, so-called overloads. Overloads are used when the same method can be run with different parameters, similar to parameter sets for PowerShell functions.
 
 Calling members of an object is done with a dot, but something that sets properties and methods apart is that methods are called by using parentheses after the method, where the parameters are provided. Even if no input is needed for the method, such as `Delete` in the list above, the parentheses are still part of the syntax to call the method.
 
-Trying to call a method without parentheses will therefore give you a different result than you might expect, because that syntax is to list the overloads of the specified method. Let's look at an example for the first file we found in our folder.
+Trying to call a method without parentheses will therefore give you a different result than you might expect. Not to say it's not useful though, because that syntax is to list the overloads of the specified method. Let's look at an example for the first file we found in our folder.
 
 ```PowerShell
 PS PipeHow:\Blog> $Files[0].CopyTo
@@ -144,7 +149,7 @@ Mode                 LastWriteTime         Length Name
 
 That was a simple example of how overloads can differ in behavior based on the parameters provided. You will find many other methods and overloads if you dive into the objects you work with daily.
 
-Going back to the overload definitions, and even the syntax of a method, we can also see the return type of the method. Methods compared to functions can only output one object or a collection of objects. It can also only output once, and the type of the output needs to be specified when writing the code. This provides you with more information from the start if you're interested in knowing exactly what your method provides you.
+Going back to the overload definitions, and even the syntax of a method, we can also see the return type of the method. Methods compared to functions can only output one object or collection of objects. It can also only output once, as the final thing of the method's code path, and the type of the output needs to be specified when writing the code. This provides you with clear information from just a glance if you're interested in knowing what a method provides you.
 
 If we take a look back at the method we used above we will see that we already have the information of what it gives us back, the return type is specified in the very start of the method.
 
@@ -152,7 +157,7 @@ If we take a look back at the method we used above we will see that we already h
 System.IO.FileInfo CopyTo(string destFileName, bool overwrite)
 ```
 
-`System.IO.FileInfo` is the return type, meaning we get the information about the file we just copied back in case we want to further do something with it.
+`System.IO.FileInfo` is the return type, meaning we get the information about the file copy we just created in case we want to further do something with it.
 
 The method `Delete` on the other hand has the return type `[void]` which meaning it does not return anything.
 
@@ -172,23 +177,16 @@ Confirming this is as simple as using the function on our file.
 PS PipeHow:\Blog> $Files[0].Delete()
 ```
 
-No output and no error, and when looking at our directory the file is gone.
+No output, no error, and when looking at our directory the file is gone.
 
 ### Static Members
 
-Members of a class can also be static. Static members means that you can access them even without an instance of an object. A commonly used static method is the `[string]` class' `IsNullOrEmpty` to validate whether or not a string is null or empty, though I'll admit I'm more of a `IsNullOrWhiteSpace` kind of guy.
+Members of a class can also be static. Compared to above where we needed a file object to copy from, static members lets you access them even without an instance of an object. A commonly used static method is the `IsNullOrEmpty` from the `[string]` class, used to validate whether or not a string is null or empty, though I'll admit I'm more of a `IsNullOrWhiteSpace` kind of guy.
 
-These methods don't need you to already have a string object, you call them directly through the string class using the double colon operator `::`, the static member accessor.
+These methods don't need you to already have a string to work with, you call them directly through the string class using the double colon operator `::`, the static member accessor.
 
 ```PowerShell
-PS PipeHow:\Blog> [string]::IsNullOrWhiteSpace
-
-OverloadDefinitions
--------------------
-static bool IsNullOrWhiteSpace(string value)
-
 PS PipeHow:\Blog> [string]::IsNullOrWhiteSpace("    ")
-
 True
 ```
 
@@ -219,7 +217,7 @@ ReferenceEquals    Method     static bool ReferenceEquals(System.Object objA, Sy
 Empty              Property   static string Empty {get;}
 ```
 
-In general you will see more static methods than properties among a class' members, but there are static properties too as shown by the `Empty` property.
+In general you will see more static methods than properties among the members of a class, but properties can be static too as shown by the `Empty` property.
 
 ```PowerShell
 PS PipeHow:\Blog> [string]::Empty -eq ''
@@ -238,13 +236,13 @@ class Money {
 }
 ```
 
-Between each example in this section, assume that I run the code defining the class again and create a new `[Money]` object using the line below.
+Between each example in this section, assume that I run the code defining the class again to re-define the class in my PowerShell session, assume that I create a new `[Money]` object using the line below.
 
 ```PowerShell
 PS PipeHow:\Blog> $Money = New-Object Money
 ```
 
-Creating a class isn't harder than that, but what is hard is to see how representation of an amount is going to be useful.
+Creating a class isn't harder than that, but what is hard is to see how a simple representation of an of money amount is going to be very useful.
 
 ```PowerShell
 PS PipeHow:\Blog> $Money
@@ -260,7 +258,7 @@ Amount
     20
 ```
 
-Let's add to our class. We want to be able to specify currency, and add a so-called constructor. You can think of the constructor as a method that is run when the object is created. The constructor can also have different overloads and is what is called in the background when using the cmdlet `New-Object`, as well as the `new` method you may see in the .NET syntax of object instantiation, such as `[datetime]::new()`.
+Let's add to our class. We want to be able to specify currency, and add a so-called constructor. You can think of the constructor as a method that is run when the object is created. The constructor can also have different overloads and is what is called in the background when using the cmdlet `New-Object`, as well as the `new` method you may see once in a while using the .NET syntax of object instantiation. We could for example use it like `[datetime]::new()`.
 
 This syntax also lets us quickly look at what different constructors a class has by not adding the parentheses.
 
@@ -304,9 +302,9 @@ class Money {
 }
 ```
 
-Looking at the code we can see something that is used only in PowerShell classes. The variable `$this` refers to the current instance of the class, meaning that when we create our `$Money` the `$this` of that object will refer to `$Money`.
+Looking at the code we can see something that is used only in PowerShell classes. The variable `$this` refers to the current instance of the class.
 
-Looking at our class with `Get-Member` we can see that our class looks just like any other .NET object, and will also have a few methods inherited from `System.Object` by default, such as `ToString` and `GetType`.
+If we take a look at our class with `Get-Member` we can see that our class looks just like any other .NET object, and will also have a few methods inherited from `System.Object` by default, such as `ToString` and `GetType`. We can also see our constructors by looking at the `new` method.
 
 ```PowerShell
 PS PipeHow:\Blog> $Money | Get-Member
@@ -334,7 +332,7 @@ For our third and final iteration of the class, let's go deeper (arguably too de
 
 ## Enums
 
-Enum? Isn't that a huge bird? No, that's the emu. An enum is an enumeration, a collection of labels representing pre-defined values, often used for validation for data where you know that it can only contain a value amongst a known set. Think of it similar to `ValidateSet` used for function parameters.
+Enum? Isn't that a huge bird? No, that's the emu. An enum is an enumeration, a collection of labels representing pre-defined values, often used for validation for data where you know that it can only contain a value amongst a known set. Think of it as similar to `ValidateSet` used for function parameters.
 
 In PowerShell you may have encountered the `System.DayOfWeek` enum when looking at `datetime` objects.
 
@@ -357,7 +355,7 @@ PS PipeHow:\Blog> [int][System.DayOfWeek]::Wednesday
 3
 ```
 
-An enum is behind the scenes simply a set of defined numbers and an instance of an enum is one of the numbers or sometimes a combination of them, which means we can also cast the enum to numbers if needed. The numbers start at 0 by default but the labels can be set manually. If only one label is set to a number, the following numbers will simply increment the number by 1.
+An enum is behind the scenes simply a set of defined numbers, and an instance of an enum is one of the numbers or sometimes a combination of them. This means we can also cast the enum to numbers if needed. The numbers start at 0 by default but the labels can be set manually. If only one label is set to a number, the following numbers will simply increment the number by 1.
 
 In PowerShell you can define an enum using the `enum` keyword and separating each value by line.
 
@@ -386,7 +384,7 @@ Sun, Rain, Wind
 
 ### A Currency Enum
 
-Going back to finalize our `Money` class to create an enum for currency is as simple as listing the different currencies we want, and changing the parameter type of `$Currency` to the new enum `[Currency]` below.
+To finish our `Money` class we want to represent the currencies using an enum, and change the type of the property `$Currency` to the new enum `[Currency]` below.
 
 ```PowerShell
 enum Currency {
@@ -396,7 +394,7 @@ enum Currency {
 }
 ```
 
-But what if we want the enum to be dynamic and read an external source of currencies? It's not possible to create a PowerShell enum without explicitly naming each label, but we can create a string of code and run it using `Invoke-Expression`.
+Simple! But what if we want the enum to be dynamic and read an external source of currencies? It's not possible to create a PowerShell enum without explicitly naming each label, but we can generate a string of the code to create the enum, and run it using `Invoke-Expression`.
 
 Let's first get all the different currencies using the public [Exchange rates API](https://exchangeratesapi.io/) published by the European Central Bank.
 
@@ -421,7 +419,7 @@ Next we will gather the names of each property, and store them in a list that we
 PS PipeHow:\Blog> $Rates = ($RateData | Get-Member -MemberType NoteProperty).Name
 ```
 
-Finally we will create our string and generate each label of the enum as part of the string, as the multi-line strings in PowerShell are called.
+Finally we will create our string and generate each label of the enum as part of the string, as a one-liner but with adding new-lines in the loop.
 
 ```PowerShell
 # Inside the currency brackets we loop through each rate and add new lines
@@ -449,39 +447,52 @@ All of the different currencies are now in our enum, so let's put together our f
 
 ## The Final Money Class
 
-To reiterate, we want to add live data for exchange rates from the same API, and we want validation for our currency.
+To finalize our class we add live data for exchange rates from the same API, and validation for our currency using our new enum.
 
 ```PowerShell
 class Money {
     [int] $Amount
-    # Change to Currency type instead of string
+    # Change to Currency type instead of string to force input to be a valid option
     [Currency] $Currency
     # Static hashtable to store rates of chosen currency
     static [hashtable] $ExchangeRates
 
     Money() {
+        # Call hidden initialize method with default values
         $this.Init(0,'SEK')
     }
     Money([int] $Amount, [Currency] $Currency) {
         $this.Init($Amount, $Currency)
     }
 
-    # Create a hidden method used from each constructor
-    # PowerShell does not have support for so-called constructor chaining
+    # Create a hidden method to use from constructors
     hidden Init([int] $Amount, [Currency] $Currency) {
         $this.Amount = $Amount
         $this.Currency = $Currency
 
+        # Create or reset the static ExchangeRates hashtable
         [Money]::ExchangeRates = @{}
+        # Get live rates from API
         $Rates = (Invoke-RestMethod "https://api.exchangeratesapi.io/latest?base=$Currency").rates
+        # Go through rates and add each value to the hashtable with name as key
         foreach ($Rate in ($Rates | Get-Member -MemberType NoteProperty).Name) {
             [Money]::ExchangeRates[$Rate] = $Rates.$Rate
         }
     }
 
+    # Add method to convert the current amount to a chosen currency
     [decimal] GetAmountAsCurrency([Currency] $Currency) {
         return $this.Amount * [Money]::ExchangeRates[$Currency.ToString()]
     }
 }
 ```
 
+A few things have been added and changed as you can see. Firstly we changed the `$Currency` property to be of the type `[Currency]`, our dynamic enum that we generated. This makes sure that it will always be of a valid currency whenever we pass values to the different methods.
+
+PowerShell does not have support for so-called constructor chaining, a way to call a constructor from another constructor. This would have let us provide default values in the no-parameter constructor to our overloaded one. Instead I opted to create a hidden method called `Init` that takes the same parameters and sets them, to have a consistent initializing of our class instance.
+
+There is a new static hashtable called `ExchangeRates` which holds all the current exchange rates, but since it is static it is not bound to a specific object. Instead there will only ever be one hashtable at a time, which comes with its own challenges, but we could expand on this implementation to clear it only when needed and minimize the amount of API calls between new `[Money]` objects.
+
+Finally we use the static hashtable in our new method `GetAmountAsCurrency` where we return the current amount converted to any specified currency with live rates from the API, validated using our enum.
+
+There are endless ways to use classes and enums, and many more neat things you can do with them than we went through today. I hope you found your interest sparked to learn more!
