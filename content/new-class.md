@@ -258,7 +258,7 @@ Amount
     20
 ```
 
-Let's add to our class. We want to be able to specify currency, and add a so-called constructor. You can think of the constructor as a method that is run when the object is created. The constructor can also have different overloads and is what is called in the background when using the cmdlet `New-Object`, as well as the `new` method you may see once in a while using the .NET syntax of object instantiation. We could for example use it like `[datetime]::new()`.
+Let's add to our class. We want to be able to specify currency, and add a so-called constructor. You can think of the constructor as a method that is run when the object is created. The constructor is always, and needs to be, named the same as the class. Just like methods it can have different overloads and is in fact what is called in the background when using the cmdlet `New-Object`, as well as the `new` method you may see once in a while using the .NET syntax of object instantiation. We could for example use it like `[datetime]::new()`.
 
 This syntax also lets us quickly look at what different constructors a class has by not adding the parentheses.
 
